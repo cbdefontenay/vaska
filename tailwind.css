@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme {
+    --color-primary: rgb(128 213 209);
+    --color-surface-tint: rgb(128 213 209);
+    --color-on-primary: rgb(0 55 54);
+    --color-primary-container: rgb(0 80 78);
+    --color-on-primary-container: rgb(156 241 238);
+    --color-secondary: rgb(148 205 247);
+    --color-on-secondary: rgb(0 52 77);
+    --color-secondary-container: rgb(0 76 110);
+    --color-on-secondary-container: rgb(200 230 255);
+    --color-tertiary: rgb(211 187 253);
+    --color-on-tertiary: rgb(57 38 92);
+    --color-tertiary-container: rgb(80 60 116);
+    --color-on-tertiary-container: rgb(235 220 255);
+    --color-error: rgb(255 180 171);
+    --color-on-error: rgb(105 0 5);
+    --color-error-container: rgb(147 0 10);
+    --color-on-error-container: rgb(255 218 214);
+    --color-background: rgb(14 21 20);
+    --color-on-background: rgb(221 228 227);
+    --color-surface: rgb(14 21 20);
+    --color-on-surface: rgb(221 228 227);
+    --color-surface-variant: rgb(63 73 72);
+    --color-on-surface-variant: rgb(190 201 199);
+    --color-outline: rgb(136 147 146);
+    --color-outline-variant: rgb(63 73 72);
+    --color-shadow: rgb(0 0 0);
+    --color-scrim: rgb(0 0 0);
+    --color-inverse-surface: rgb(221 228 227);
+    --color-inverse-on-surface: rgb(43 50 49);
+    --color-inverse-primary: rgb(0 106 103);
+    --color-primary-fixed: rgb(156 241 238);
+    --color-on-primary-fixed: rgb(0 32 31);
+    --color-primary-fixed-dim: rgb(128 213 209);
+    --color-on-primary-fixed-variant: rgb(0 80 78);
+    --color-secondary-fixed: rgb(200 230 255);
+    --color-on-secondary-fixed: rgb(0 30 47);
+    --color-secondary-fixed-dim: rgb(148 205 247);
+    --color-on-secondary-fixed-variant: rgb(0 76 110);
+    --color-tertiary-fixed: rgb(235 220 255);
+    --color-on-tertiary-fixed: rgb(35 15 70);
+    --color-tertiary-fixed-dim: rgb(211 187 253);
+    --color-on-tertiary-fixed-variant: rgb(80 60 116);
+    --color-surface-dim: rgb(14 21 20);
+    --color-surface-bright: rgb(52 58 58);
+    --color-surface-container-lowest: rgb(9 15 15);
+    --color-surface-container-low: rgb(22 29 28);
+    --color-surface-container: rgb(26 33 32);
+    --color-surface-container-high: rgb(37 43 43);
+    --color-surface-container-highest: rgb(47 54 53);
+}
+
+@layer base {
+    html, body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--color-background);
+        color: var(--color-on-background);
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+}
