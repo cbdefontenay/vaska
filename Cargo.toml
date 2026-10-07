@@ -1,16 +1,20 @@
 [package]
-name = "vaskar"
+name = "vaska"
 version = "0.1.0"
-authors = ["cbdefontenay"]
+authors = ["cyprien"]
 edition = "2021"
 
 
 [dependencies]
-androxus = "0.1.7"
 dioxus = { version = "0.8.0-alpha.1", features = ["router"] }
-web-sys = { version= "0.3.106", features = ["Window", "Navigator", "Clipboard"] }
-wasm-bindgen-futures = "0.4.79"
+androxus = "0.1.7"
+reqwest = { version = "0.13.5", features = ["json", "rustls"] }
+webpki-root-certs = "1.0.9"
 
 [features]
 default = ["mobile"]
 mobile = ["dioxus/mobile"]
+
+[target.'cfg(target_os = "android")'.dependencies]
+android_logger = "0.15"
+log = "0.4"

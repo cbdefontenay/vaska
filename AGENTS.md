@@ -263,3 +263,906 @@ The initial UI rendered by the component on the client must be identical to the 
 
 * Use the `use_server_future` hook instead of `use_resource`. It runs the future on the server, serializes the result, and sends it to the client, ensuring the client has the data immediately for its first render.
 * Any code that relies on browser-specific APIs (like accessing `localStorage`) must be run *after* hydration. Place this code inside a `use_effect` hook.
+
+
+<SYSTEM>This is the developer documentation for Dioxus from /learn/0.7/tutorial/data_fetching.</SYSTEM>
+# Fetching Data
+
+## Adding Dependencies
+
+Dioxus does not provide any built-in utilities for fetching data. Crates like [dioxus-query](https://github.com/marc2332/dioxus-query) exist, but for this tutorial we'll implement data-fetching from scratch.
+
+First, we need to add two new dependencies to our app: [serde](https://crates.io/crates/serde) and [reqwest](https://crates.io/crates/reqwest).
+
+* Reqwest provides an HTTP client for fetching.
+* Serde will let us derive a JSON Deserializer to decode the response.
+
+In a new terminal window, add these crates to your app with `cargo add`.
+
+````bash
+cargo add reqwest --features json
+cargo add serde --features derive
+````
+
+## Defining a Response Type
+
+We'll be using the amazing [dog.ceo/dog-api](https://dog.ceo/dog-api/) to fetch images of dogs for *HotDog*. Fortunately, the API response is quite simple to deserialize. Let's create a new Rust struct that matches the format of the API and derive `Deserialize` for it.
+
+The Dog API docs outline a sample API response:
+
+````json
+{
+    "message": "https://images.dog.ceo/breeds/leonberg/n02111129_974.jpg",
+    "status": "success"
+}
+````
+
+Our Rust struct needs to match that format, though for now we'll only include the "message" field.
+
+````rs@guide_data_fetching.rs
+#[derive(serde::Deserialize)]
+struct DogApi {
+    message: String,
+}
+````
+
+## Using `reqwest` and `async`
+
+Dioxus has great support for asynchronous Rust. We can simply convert our `onclick` handler to be `async` and then set the `img_src` after the future has resolved.
+
+![Dog Fetching](/assets/06_docs/fetch-dog.mp4)
+
+The changes to our code are quite simple - just add the `reqwest::get` call and then call `.set()` on `img_src` with the result.
+
+````rs@guide_data_fetching.rs
+#[component]
+fn DogView() -> Element {
+    let mut img_src = use_signal(|| "".to_string());
+
+    let save = move |_| async move {
+        let response = reqwest::get("https://dog.ceo/api/breeds/image/random")
+            .await
+            .unwrap()
+            .json::<DogApi>()
+            .await
+            .unwrap();
+
+        img_src.set(response.message);
+    };
+
+    // ..
+
+    rsx! {
+        div { id: "dogview",
+            img { src: "{img_src}" }
+        }
+        div { id: "buttons",
+            // ..
+            button { onclick: save, id: "save", "save!" }
+        }
+    }
+}
+````
+
+Dioxus automatically calls `dioxus::spawn` on asynchronous closures. You can also use `dioxus::spawn` to perform async work *without* async closures - just call `dioxus::spawn()` on any async block. Futures spawned with `dioxus::spawn` automatically run on the current async executor and are dropped automatically.
+
+````rs@guide_data_fetching.rs
+rsx! {
+    button {
+        onclick: move |_| {
+            spawn(async move {
+                // do some async work...
+            });
+        }
+    }
+}
+````
+
+The futures passed to `dioxus::spawn` can not borrow data from outside the async block. Data that is `Copy` *can* be captured by async blocks, but all other data must be *moved*, usually by calling `.clone()`.
+
+## Data Fetching with `use_resource`
+
+Eventually, using bare `async` calls might lead to race conditions and weird state bugs. For example, if the user clicks the *fetch* button too quickly, then two requests will be made in parallel. If the request is updating data somewhere else, the wrong request might finish early and causes a race condition.
+
+In Dioxus, *Resources* are pieces of state whose value is dependent on the completion of some asynchronous work. The `use_resource` hook provides a `Resource` object with helpful methods to start, stop, pause, and modify the asynchronous state.
+
+Let's change our component to use a resource instead:
+
+````rs@guide_data_fetching.rs
+#[component]
+fn DogView() -> Element {
+    let mut img_src = use_resource(|| async move {
+        reqwest::get("https://dog.ceo/api/breeds/image/random")
+            .await
+            .unwrap()
+            .json::<DogApi>()
+            .await
+            .unwrap()
+            .message
+    });
+
+    rsx! {
+        div { id: "dogview",
+            img { src: img_src.cloned().unwrap_or_default() }
+        }
+        div { id: "buttons",
+            button { onclick: move |_| img_src.restart(), id: "skip", "skip" }
+            button { onclick: move |_| img_src.restart(), id: "save", "save!" }
+        }
+    }
+}
+````
+
+Resources are very powerful: they integrate with Suspense, Streaming HTML, reactivity, and more.
+
+The details of the `Resource` API are not terribly important right now, but you'll be using Resources frequently in larger apps, so it's a good idea to [read the docs](https://docs.rs/dioxus-hooks/latest/dioxus_hooks/fn.use_resource.html).
+# Fetching Data
+
+## Adding Dependencies
+
+Dioxus does not provide any built-in utilities for fetching data. Crates like [dioxus-query](https://github.com/marc2332/dioxus-query) exist, but for this tutorial we'll implement data-fetching from scratch.
+
+First, we need to add two new dependencies to our app: [serde](https://crates.io/crates/serde) and [reqwest](https://crates.io/crates/reqwest).
+
+* Reqwest provides an HTTP client for fetching.
+* Serde will let us derive a JSON Deserializer to decode the response.
+
+In a new terminal window, add these crates to your app with `cargo add`.
+
+````bash
+cargo add reqwest --features json
+cargo add serde --features derive
+````
+
+## Defining a Response Type
+
+We'll be using the amazing [dog.ceo/dog-api](https://dog.ceo/dog-api/) to fetch images of dogs for *HotDog*. Fortunately, the API response is quite simple to deserialize. Let's create a new Rust struct that matches the format of the API and derive `Deserialize` for it.
+
+The Dog API docs outline a sample API response:
+
+````json
+{
+    "message": "https://images.dog.ceo/breeds/leonberg/n02111129_974.jpg",
+    "status": "success"
+}
+````
+
+Our Rust struct needs to match that format, though for now we'll only include the "message" field.
+
+````rs@guide_data_fetching.rs
+#[derive(serde::Deserialize)]
+struct DogApi {
+    message: String,
+}
+````
+
+## Using `reqwest` and `async`
+
+Dioxus has great support for asynchronous Rust. We can simply convert our `onclick` handler to be `async` and then set the `img_src` after the future has resolved.
+
+![Dog Fetching](/assets/06_docs/fetch-dog.mp4)
+
+The changes to our code are quite simple - just add the `reqwest::get` call and then call `.set()` on `img_src` with the result.
+
+````rs@guide_data_fetching.rs
+#[component]
+fn DogView() -> Element {
+    let mut img_src = use_signal(|| "".to_string());
+
+    let save = move |_| async move {
+        let response = reqwest::get("https://dog.ceo/api/breeds/image/random")
+            .await
+            .unwrap()
+            .json::<DogApi>()
+            .await
+            .unwrap();
+
+        img_src.set(response.message);
+    };
+
+    // ..
+
+    rsx! {
+        div { id: "dogview",
+            img { src: "{img_src}" }
+        }
+        div { id: "buttons",
+            // ..
+            button { onclick: save, id: "save", "save!" }
+        }
+    }
+}
+````
+
+Dioxus automatically calls `dioxus::spawn` on asynchronous closures. You can also use `dioxus::spawn` to perform async work *without* async closures - just call `dioxus::spawn()` on any async block. Futures spawned with `dioxus::spawn` automatically run on the current async executor and are dropped automatically.
+
+````rs@guide_data_fetching.rs
+rsx! {
+    button {
+        onclick: move |_| {
+            spawn(async move {
+                // do some async work...
+            });
+        }
+    }
+}
+````
+
+The futures passed to `dioxus::spawn` can not borrow data from outside the async block. Data that is `Copy` *can* be captured by async blocks, but all other data must be *moved*, usually by calling `.clone()`.
+
+## Data Fetching with `use_resource`
+
+Eventually, using bare `async` calls might lead to race conditions and weird state bugs. For example, if the user clicks the *fetch* button too quickly, then two requests will be made in parallel. If the request is updating data somewhere else, the wrong request might finish early and causes a race condition.
+
+In Dioxus, *Resources* are pieces of state whose value is dependent on the completion of some asynchronous work. The `use_resource` hook provides a `Resource` object with helpful methods to start, stop, pause, and modify the asynchronous state.
+
+Let's change our component to use a resource instead:
+
+````rs@guide_data_fetching.rs
+#[component]
+fn DogView() -> Element {
+    let mut img_src = use_resource(|| async move {
+        reqwest::get("https://dog.ceo/api/breeds/image/random")
+            .await
+            .unwrap()
+            .json::<DogApi>()
+            .await
+            .unwrap()
+            .message
+    });
+
+    rsx! {
+        div { id: "dogview",
+            img { src: img_src.cloned().unwrap_or_default() }
+        }
+        div { id: "buttons",
+            button { onclick: move |_| img_src.restart(), id: "skip", "skip" }
+            button { onclick: move |_| img_src.restart(), id: "save", "save!" }
+        }
+    }
+}
+````
+
+Resources are very powerful: they integrate with Suspense, Streaming HTML, reactivity, and more.
+
+The details of the `Resource` API are not terribly important right now, but you'll be using Resources frequently in larger apps, so it's a good idea to [read the docs](https://docs.rs/dioxus-hooks/latest/dioxus_hooks/fn.use_resource.html).
+
+<SYSTEM>This is the developer documentation for Dioxus from /learn/0.7/guides/deploy/config.</SYSTEM>
+### Bundling config
+
+The `[bundle]` section of our Dioxus.toml can take a variety of options.
+
+Here are the options, in the form of Rust structs.
+
+````rust
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub(crate) struct BundleConfig {
+    /// eg. com.dioxuslabs
+    pub(crate) identifier: Option<String>,
+    /// eg. DioxusLabs
+    pub(crate) publisher: Option<String>,
+    /// eg. assets/icon.png
+    pub(crate) icon: Option<Vec<String>>,
+    /// eg. Extra assets like "img.png"
+    pub(crate) resources: Option<Vec<String>>,
+    /// eg. DioxusLabs
+    pub(crate) copyright: Option<String>,
+    /// eg. "Social Media"
+    pub(crate) category: Option<String>,
+    /// eg. "A great social media app"
+    pub(crate) short_description: Option<String>,
+    /// eg. "A social media app that makes people love app development"
+    pub(crate) long_description: Option<String>,
+    /// eg. extra binaries (like tools) to include in the final app
+    pub(crate) external_bin: Option<Vec<String>>,
+    /// Additional debian-only settings (see below)
+    pub(crate) deb: Option<DebianSettings>,
+    /// Additional macos settings (see below)
+    pub(crate) macos: Option<MacOsSettings>,
+    /// Additional windows settings (see below)
+    pub(crate) windows: Option<WindowsSettings>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub(crate) struct DebianSettings {
+    // OS-specific settings:
+    /// the list of debian dependencies.
+    pub depends: Option<Vec<String>>,
+    /// the list of dependencies the package provides.
+    pub provides: Option<Vec<String>>,
+    /// the list of package conflicts.
+    pub conflicts: Option<Vec<String>>,
+    /// the list of package replaces.
+    pub replaces: Option<Vec<String>>,
+    /// List of custom files to add to the deb package.
+    /// Maps the path on the debian package to the path of the file to include (relative to the current working directory).
+    pub files: HashMap<PathBuf, PathBuf>,
+    /// Path to a custom desktop file Handlebars template.
+    ///
+    /// Available variables: `categories`, `comment` (optional), `exec`, `icon` and `name`.
+    pub desktop_template: Option<PathBuf>,
+    /// Define the section in Debian Control file. See : <https://www.debian.org/doc/debian-policy/ch-archive.html#s-subsections>
+    pub section: Option<String>,
+    /// Change the priority of the Debian Package. By default, it is set to `optional`.
+    /// Recognized Priorities as of now are :  `required`, `important`, `standard`, `optional`, `extra`
+    pub priority: Option<String>,
+    /// Path of the uncompressed Changelog file, to be stored at /usr/share/doc/package-name/changelog.gz. See
+    /// <https://www.debian.org/doc/debian-policy/ch-docs.html#changelog-files-and-release-notes>
+    pub changelog: Option<PathBuf>,
+    /// Path to script that will be executed before the package is unpacked. See
+    /// <https://www.debian.org/doc/debian-policy/ch-maintainerscripts.html>
+    pub pre_install_script: Option<PathBuf>,
+    /// Path to script that will be executed after the package is unpacked. See
+    /// <https://www.debian.org/doc/debian-policy/ch-maintainerscripts.html>
+    pub post_install_script: Option<PathBuf>,
+    /// Path to script that will be executed before the package is removed. See
+    /// <https://www.debian.org/doc/debian-policy/ch-maintainerscripts.html>
+    pub pre_remove_script: Option<PathBuf>,
+    /// Path to script that will be executed after the package is removed. See
+    /// <https://www.debian.org/doc/debian-policy/ch-maintainerscripts.html>
+    pub post_remove_script: Option<PathBuf>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub(crate) struct WixSettings {
+    pub(crate) language: Vec<(String, Option<PathBuf>)>,
+    pub(crate) template: Option<PathBuf>,
+    pub(crate) fragment_paths: Vec<PathBuf>,
+    pub(crate) component_group_refs: Vec<String>,
+    pub(crate) component_refs: Vec<String>,
+    pub(crate) feature_group_refs: Vec<String>,
+    pub(crate) feature_refs: Vec<String>,
+    pub(crate) merge_refs: Vec<String>,
+    pub(crate) skip_webview_install: bool,
+    pub(crate) license: Option<PathBuf>,
+    pub(crate) enable_elevated_update_task: bool,
+    pub(crate) banner_path: Option<PathBuf>,
+    pub(crate) dialog_image_path: Option<PathBuf>,
+    pub(crate) fips_compliant: bool,
+    /// MSI installer version in the format `major.minor.patch.build` (build is optional).
+    ///
+    /// Because a valid version is required for MSI installer, it will be derived from [`PackageSettings::version`] if this field is not set.
+    ///
+    /// The first field is the major version and has a maximum value of 255. The second field is the minor version and has a maximum value of 255.
+    /// The third and fourth fields have a maximum value of 65,535.
+    ///
+    /// See <https://learn.microsoft.com/en-us/windows/win32/msi/productversion> for more info.
+    pub version: Option<String>,
+    /// A GUID upgrade code for MSI installer. This code **_must stay the same across all of your updates_**,
+    /// otherwise, Windows will treat your update as a different app and your users will have duplicate versions of your app.
+    ///
+    /// By default, tauri generates this code by generating a Uuid v5 using the string `<productName>.exe.app.x64` in the DNS namespace.
+    /// You can use Tauri's CLI to generate and print this code for you by running `tauri inspect wix-upgrade-code`.
+    ///
+    /// It is recommended that you set this value in your tauri config file to avoid accidental changes in your upgrade code
+    /// whenever you want to change your product name.
+    pub upgrade_code: Option<uuid::Uuid>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub(crate) struct MacOsSettings {
+    pub(crate) frameworks: Option<Vec<String>>,
+    pub(crate) minimum_system_version: Option<String>,
+    pub(crate) license: Option<String>,
+    pub(crate) exception_domain: Option<String>,
+    pub(crate) signing_identity: Option<String>,
+    pub(crate) provider_short_name: Option<String>,
+    pub(crate) entitlements: Option<String>,
+    pub(crate) info_plist_path: Option<PathBuf>,
+    /// List of custom files to add to the application bundle.
+    /// Maps the path in the Contents directory in the app to the path of the file to include (relative to the current working directory).
+    pub files: HashMap<PathBuf, PathBuf>,
+    /// Preserve the hardened runtime version flag, see <https://developer.apple.com/documentation/security/hardened_runtime>
+    ///
+    /// Settings this to `false` is useful when using an ad-hoc signature, making it less strict.
+    pub hardened_runtime: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) struct WindowsSettings {
+    pub(crate) digest_algorithm: Option<String>,
+    pub(crate) certificate_thumbprint: Option<String>,
+    pub(crate) timestamp_url: Option<String>,
+    pub(crate) tsp: bool,
+    pub(crate) wix: Option<WixSettings>,
+    pub(crate) icon_path: Option<PathBuf>,
+    pub(crate) webview_install_mode: WebviewInstallMode,
+    pub(crate) webview_fixed_runtime_path: Option<PathBuf>,
+    pub(crate) allow_downgrades: bool,
+    pub(crate) nsis: Option<NsisSettings>,
+    /// Specify a custom command to sign the binaries.
+    /// This command needs to have a `%1` in it which is just a placeholder for the binary path,
+    /// which we will detect and replace before calling the command.
+    ///
+    /// Example:
+    /// ```text
+    /// sign-cli --arg1 --arg2 %1
+    /// ```
+    ///
+    /// By Default we use `signtool.exe` which can be found only on Windows so
+    /// if you are on another platform and want to cross-compile and sign you will
+    /// need to use another tool like `osslsigncode`.
+    pub sign_command: Option<CustomSignCommandSettings>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) struct NsisSettings {
+    pub(crate) template: Option<PathBuf>,
+    pub(crate) license: Option<PathBuf>,
+    pub(crate) header_image: Option<PathBuf>,
+    pub(crate) sidebar_image: Option<PathBuf>,
+    pub(crate) installer_icon: Option<PathBuf>,
+    pub(crate) install_mode: NSISInstallerMode,
+    pub(crate) languages: Option<Vec<String>>,
+    pub(crate) custom_language_files: Option<HashMap<String, PathBuf>>,
+    pub(crate) display_language_selector: bool,
+    pub(crate) start_menu_folder: Option<String>,
+    pub(crate) installer_hooks: Option<PathBuf>,
+    /// Try to ensure that the WebView2 version is equal to or newer than this version,
+    /// if the user's WebView2 is older than this version,
+    /// the installer will try to trigger a WebView2 update.
+    pub minimum_webview2_version: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) enum NSISInstallerMode {
+    CurrentUser,
+    PerMachine,
+    Both,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) enum WebviewInstallMode {
+    Skip,
+    DownloadBootstrapper { silent: bool },
+    EmbedBootstrapper { silent: bool },
+    OfflineInstaller { silent: bool },
+    FixedRuntime { path: PathBuf },
+}
+
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CustomSignCommandSettings {
+    /// The command to run to sign the binary.
+    pub cmd: String,
+    /// The arguments to pass to the command.
+    ///
+    /// "%1" will be replaced with the path to the binary to be signed.
+    pub args: Vec<String>,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub(crate) enum PackageType {
+    /// "macos"
+    MacOsBundle,
+    /// "ios"
+    IosBundle,
+    /// "msi"
+    WindowsMsi,
+    /// "nsis"
+    Nsis,
+    /// "deb"
+    Deb,
+    /// "rpm"
+    Rpm,
+    /// "appimage"
+    AppImage,
+    /// "dmg"
+    Dmg,
+    /// "updater"
+    Updater,
+}
+````
+### Bundling config
+
+The `[bundle]` section of our Dioxus.toml can take a variety of options.
+
+Here are the options, in the form of Rust structs.
+
+````rust
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub(crate) struct BundleConfig {
+    /// eg. com.dioxuslabs
+    pub(crate) identifier: Option<String>,
+    /// eg. DioxusLabs
+    pub(crate) publisher: Option<String>,
+    /// eg. assets/icon.png
+    pub(crate) icon: Option<Vec<String>>,
+    /// eg. Extra assets like "img.png"
+    pub(crate) resources: Option<Vec<String>>,
+    /// eg. DioxusLabs
+    pub(crate) copyright: Option<String>,
+    /// eg. "Social Media"
+    pub(crate) category: Option<String>,
+    /// eg. "A great social media app"
+    pub(crate) short_description: Option<String>,
+    /// eg. "A social media app that makes people love app development"
+    pub(crate) long_description: Option<String>,
+    /// eg. extra binaries (like tools) to include in the final app
+    pub(crate) external_bin: Option<Vec<String>>,
+    /// Additional debian-only settings (see below)
+    pub(crate) deb: Option<DebianSettings>,
+    /// Additional macos settings (see below)
+    pub(crate) macos: Option<MacOsSettings>,
+    /// Additional windows settings (see below)
+    pub(crate) windows: Option<WindowsSettings>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub(crate) struct DebianSettings {
+    // OS-specific settings:
+    /// the list of debian dependencies.
+    pub depends: Option<Vec<String>>,
+    /// the list of dependencies the package provides.
+    pub provides: Option<Vec<String>>,
+    /// the list of package conflicts.
+    pub conflicts: Option<Vec<String>>,
+    /// the list of package replaces.
+    pub replaces: Option<Vec<String>>,
+    /// List of custom files to add to the deb package.
+    /// Maps the path on the debian package to the path of the file to include (relative to the current working directory).
+    pub files: HashMap<PathBuf, PathBuf>,
+    /// Path to a custom desktop file Handlebars template.
+    ///
+    /// Available variables: `categories`, `comment` (optional), `exec`, `icon` and `name`.
+    pub desktop_template: Option<PathBuf>,
+    /// Define the section in Debian Control file. See : <https://www.debian.org/doc/debian-policy/ch-archive.html#s-subsections>
+    pub section: Option<String>,
+    /// Change the priority of the Debian Package. By default, it is set to `optional`.
+    /// Recognized Priorities as of now are :  `required`, `important`, `standard`, `optional`, `extra`
+    pub priority: Option<String>,
+    /// Path of the uncompressed Changelog file, to be stored at /usr/share/doc/package-name/changelog.gz. See
+    /// <https://www.debian.org/doc/debian-policy/ch-docs.html#changelog-files-and-release-notes>
+    pub changelog: Option<PathBuf>,
+    /// Path to script that will be executed before the package is unpacked. See
+    /// <https://www.debian.org/doc/debian-policy/ch-maintainerscripts.html>
+    pub pre_install_script: Option<PathBuf>,
+    /// Path to script that will be executed after the package is unpacked. See
+    /// <https://www.debian.org/doc/debian-policy/ch-maintainerscripts.html>
+    pub post_install_script: Option<PathBuf>,
+    /// Path to script that will be executed before the package is removed. See
+    /// <https://www.debian.org/doc/debian-policy/ch-maintainerscripts.html>
+    pub pre_remove_script: Option<PathBuf>,
+    /// Path to script that will be executed after the package is removed. See
+    /// <https://www.debian.org/doc/debian-policy/ch-maintainerscripts.html>
+    pub post_remove_script: Option<PathBuf>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub(crate) struct WixSettings {
+    pub(crate) language: Vec<(String, Option<PathBuf>)>,
+    pub(crate) template: Option<PathBuf>,
+    pub(crate) fragment_paths: Vec<PathBuf>,
+    pub(crate) component_group_refs: Vec<String>,
+    pub(crate) component_refs: Vec<String>,
+    pub(crate) feature_group_refs: Vec<String>,
+    pub(crate) feature_refs: Vec<String>,
+    pub(crate) merge_refs: Vec<String>,
+    pub(crate) skip_webview_install: bool,
+    pub(crate) license: Option<PathBuf>,
+    pub(crate) enable_elevated_update_task: bool,
+    pub(crate) banner_path: Option<PathBuf>,
+    pub(crate) dialog_image_path: Option<PathBuf>,
+    pub(crate) fips_compliant: bool,
+    /// MSI installer version in the format `major.minor.patch.build` (build is optional).
+    ///
+    /// Because a valid version is required for MSI installer, it will be derived from [`PackageSettings::version`] if this field is not set.
+    ///
+    /// The first field is the major version and has a maximum value of 255. The second field is the minor version and has a maximum value of 255.
+    /// The third and fourth fields have a maximum value of 65,535.
+    ///
+    /// See <https://learn.microsoft.com/en-us/windows/win32/msi/productversion> for more info.
+    pub version: Option<String>,
+    /// A GUID upgrade code for MSI installer. This code **_must stay the same across all of your updates_**,
+    /// otherwise, Windows will treat your update as a different app and your users will have duplicate versions of your app.
+    ///
+    /// By default, tauri generates this code by generating a Uuid v5 using the string `<productName>.exe.app.x64` in the DNS namespace.
+    /// You can use Tauri's CLI to generate and print this code for you by running `tauri inspect wix-upgrade-code`.
+    ///
+    /// It is recommended that you set this value in your tauri config file to avoid accidental changes in your upgrade code
+    /// whenever you want to change your product name.
+    pub upgrade_code: Option<uuid::Uuid>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub(crate) struct MacOsSettings {
+    pub(crate) frameworks: Option<Vec<String>>,
+    pub(crate) minimum_system_version: Option<String>,
+    pub(crate) license: Option<String>,
+    pub(crate) exception_domain: Option<String>,
+    pub(crate) signing_identity: Option<String>,
+    pub(crate) provider_short_name: Option<String>,
+    pub(crate) entitlements: Option<String>,
+    pub(crate) info_plist_path: Option<PathBuf>,
+    /// List of custom files to add to the application bundle.
+    /// Maps the path in the Contents directory in the app to the path of the file to include (relative to the current working directory).
+    pub files: HashMap<PathBuf, PathBuf>,
+    /// Preserve the hardened runtime version flag, see <https://developer.apple.com/documentation/security/hardened_runtime>
+    ///
+    /// Settings this to `false` is useful when using an ad-hoc signature, making it less strict.
+    pub hardened_runtime: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) struct WindowsSettings {
+    pub(crate) digest_algorithm: Option<String>,
+    pub(crate) certificate_thumbprint: Option<String>,
+    pub(crate) timestamp_url: Option<String>,
+    pub(crate) tsp: bool,
+    pub(crate) wix: Option<WixSettings>,
+    pub(crate) icon_path: Option<PathBuf>,
+    pub(crate) webview_install_mode: WebviewInstallMode,
+    pub(crate) webview_fixed_runtime_path: Option<PathBuf>,
+    pub(crate) allow_downgrades: bool,
+    pub(crate) nsis: Option<NsisSettings>,
+    /// Specify a custom command to sign the binaries.
+    /// This command needs to have a `%1` in it which is just a placeholder for the binary path,
+    /// which we will detect and replace before calling the command.
+    ///
+    /// Example:
+    /// ```text
+    /// sign-cli --arg1 --arg2 %1
+    /// ```
+    ///
+    /// By Default we use `signtool.exe` which can be found only on Windows so
+    /// if you are on another platform and want to cross-compile and sign you will
+    /// need to use another tool like `osslsigncode`.
+    pub sign_command: Option<CustomSignCommandSettings>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) struct NsisSettings {
+    pub(crate) template: Option<PathBuf>,
+    pub(crate) license: Option<PathBuf>,
+    pub(crate) header_image: Option<PathBuf>,
+    pub(crate) sidebar_image: Option<PathBuf>,
+    pub(crate) installer_icon: Option<PathBuf>,
+    pub(crate) install_mode: NSISInstallerMode,
+    pub(crate) languages: Option<Vec<String>>,
+    pub(crate) custom_language_files: Option<HashMap<String, PathBuf>>,
+    pub(crate) display_language_selector: bool,
+    pub(crate) start_menu_folder: Option<String>,
+    pub(crate) installer_hooks: Option<PathBuf>,
+    /// Try to ensure that the WebView2 version is equal to or newer than this version,
+    /// if the user's WebView2 is older than this version,
+    /// the installer will try to trigger a WebView2 update.
+    pub minimum_webview2_version: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) enum NSISInstallerMode {
+    CurrentUser,
+    PerMachine,
+    Both,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) enum WebviewInstallMode {
+    Skip,
+    DownloadBootstrapper { silent: bool },
+    EmbedBootstrapper { silent: bool },
+    OfflineInstaller { silent: bool },
+    FixedRuntime { path: PathBuf },
+}
+
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CustomSignCommandSettings {
+    /// The command to run to sign the binary.
+    pub cmd: String,
+    /// The arguments to pass to the command.
+    ///
+    /// "%1" will be replaced with the path to the binary to be signed.
+    pub args: Vec<String>,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub(crate) enum PackageType {
+    /// "macos"
+    MacOsBundle,
+    /// "ios"
+    IosBundle,
+    /// "msi"
+    WindowsMsi,
+    /// "nsis"
+    Nsis,
+    /// "deb"
+    Deb,
+    /// "rpm"
+    Rpm,
+    /// "appimage"
+    AppImage,
+    /// "dmg"
+    Dmg,
+    /// "updater"
+    Updater,
+}
+````
+
+<SYSTEM>This is the developer documentation for Dioxus from /learn/0.7/guides/deploy/.</SYSTEM>
+# Publishing
+
+After you have built your application, you will need to publish it somewhere. This reference will outline different methods of publishing your desktop or web application.
+
+## Web: Publishing with GitHub Pages
+
+Edit your `Dioxus.toml` to point your `out_dir` to the `docs` folder and the `base_path` to the name of your repo:
+
+````toml
+[application]
+# ...
+[web.app]
+base_path = "your_repo"
+````
+
+Then build your app and publish it to Github:
+
+* Make sure GitHub Pages is set up for your repo to publish any static files in the docs directory
+* Build your app into the `docs` directory with:
+
+````sh
+dx bundle --out-dir docs
+````
+
+* Move the static content from `docs/public` to `docs`
+
+````sh
+mv docs/public/* docs
+````
+
+* Make a copy of your `docs/index.html` file and rename the copy to `docs/404.html` so that your app will work with client-side routing:
+
+````sh
+cp docs/index.html docs/404.html
+````
+
+* Add and commit with git
+* Push to GitHub
+
+## Desktop: Creating an installer
+
+Dioxus desktop app uses your operating system's WebView library, so it's portable to be distributed for other platforms.
+
+In this section, we'll cover how to bundle your app for macOS, Windows, and Linux.
+
+## Preparing your application for bundling
+
+Depending on your platform, you may need to add some additional code to your `main.rs` file to make sure your app is ready for bundling. On Windows, you'll need to add the `#![windows_subsystem = "windows"]` attribute to your `main.rs` file to hide the terminal window that pops up when you run your app. **If you're developing on Windows, only use this when bundling.** It will disable the terminal, so you will not get logs of any kind. You can gate it behind a feature, like so:
+
+````toml
+# Cargo.toml
+[features]
+bundle = []
+````
+
+And then your `main.rs`:
+
+````rust
+#![cfg_attr(feature = "bundle", windows_subsystem = "windows")]
+````
+
+## Adding assets to your application
+
+If you want to bundle assets with your application, you can either use them with the `manganis` crate (covered more in the [assets](../../essentials/ui/assets.md) page), or you can include them in your `Dioxus.toml` file:
+
+````toml
+[bundle]
+# The list of files to include in the bundle. These can contain globs.
+resources = ["main.css", "header.svg", "**/*.png"]
+````
+
+## Install `dioxus CLI`
+
+The first thing we'll do is install the [dioxus-cli](https://github.com/DioxusLabs/dioxus/tree/main/packages/cli). This extension to cargo will make it very easy to package our app for the various platforms.
+
+To install, simply run
+
+`cargo install dioxus-cli`
+
+## Building
+
+To bundle your application you can simply run `dx bundle --release` (also add `--features bundle` if you're using that, see the [this](#preparing-your-application-for-bundling) for more) to produce a final app with all the optimizations and assets builtin.
+
+Once you've ran the command, your app should be accessible in `dist/bundle/`.
+
+For example, a macOS app would look like this:
+
+![Published App](/assets/static/publish.png)
+
+Nice! And it's only 4.8 Mb – extremely lean!! Because Dioxus leverages your platform's native WebView, Dioxus apps are extremely memory efficient and won't waste your battery.
+
+>
+> Note: not all CSS works the same on all platforms. Make sure to view your app's CSS on each platform – or web browser (Firefox, Chrome, Safari) before publishing.
+# Publishing
+
+After you have built your application, you will need to publish it somewhere. This reference will outline different methods of publishing your desktop or web application.
+
+## Web: Publishing with GitHub Pages
+
+Edit your `Dioxus.toml` to point your `out_dir` to the `docs` folder and the `base_path` to the name of your repo:
+
+````toml
+[application]
+# ...
+[web.app]
+base_path = "your_repo"
+````
+
+Then build your app and publish it to Github:
+
+* Make sure GitHub Pages is set up for your repo to publish any static files in the docs directory
+* Build your app into the `docs` directory with:
+
+````sh
+dx bundle --out-dir docs
+````
+
+* Move the static content from `docs/public` to `docs`
+
+````sh
+mv docs/public/* docs
+````
+
+* Make a copy of your `docs/index.html` file and rename the copy to `docs/404.html` so that your app will work with client-side routing:
+
+````sh
+cp docs/index.html docs/404.html
+````
+
+* Add and commit with git
+* Push to GitHub
+
+## Desktop: Creating an installer
+
+Dioxus desktop app uses your operating system's WebView library, so it's portable to be distributed for other platforms.
+
+In this section, we'll cover how to bundle your app for macOS, Windows, and Linux.
+
+## Preparing your application for bundling
+
+Depending on your platform, you may need to add some additional code to your `main.rs` file to make sure your app is ready for bundling. On Windows, you'll need to add the `#![windows_subsystem = "windows"]` attribute to your `main.rs` file to hide the terminal window that pops up when you run your app. **If you're developing on Windows, only use this when bundling.** It will disable the terminal, so you will not get logs of any kind. You can gate it behind a feature, like so:
+
+````toml
+# Cargo.toml
+[features]
+bundle = []
+````
+
+And then your `main.rs`:
+
+````rust
+#![cfg_attr(feature = "bundle", windows_subsystem = "windows")]
+````
+
+## Adding assets to your application
+
+If you want to bundle assets with your application, you can either use them with the `manganis` crate (covered more in the [assets](../../essentials/ui/assets.md) page), or you can include them in your `Dioxus.toml` file:
+
+````toml
+[bundle]
+# The list of files to include in the bundle. These can contain globs.
+resources = ["main.css", "header.svg", "**/*.png"]
+````
+
+## Install `dioxus CLI`
+
+The first thing we'll do is install the [dioxus-cli](https://github.com/DioxusLabs/dioxus/tree/main/packages/cli). This extension to cargo will make it very easy to package our app for the various platforms.
+
+To install, simply run
+
+`cargo install dioxus-cli`
+
+## Building
+
+To bundle your application you can simply run `dx bundle --release` (also add `--features bundle` if you're using that, see the [this](#preparing-your-application-for-bundling) for more) to produce a final app with all the optimizations and assets builtin.
+
+Once you've ran the command, your app should be accessible in `dist/bundle/`.
+
+For example, a macOS app would look like this:
+
+![Published App](/assets/static/publish.png)
+
+Nice! And it's only 4.8 Mb – extremely lean!! Because Dioxus leverages your platform's native WebView, Dioxus apps are extremely memory efficient and won't waste your battery.
+
+>
+> Note: not all CSS works the same on all platforms. Make sure to view your app's CSS on each platform – or web browser (Firefox, Chrome, Safari) before publishing.

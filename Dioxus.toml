@@ -1,9 +1,26 @@
 [application]
+name = "Vaska"
+default_platform = "mobile"
+asset_dir = "assets"
+
+[bundle]
+identifier = "com.cyprien.vaska"
+publisher = "cyprien"
+icon = ["assets/app-icon.png"]
+resources = ["assets"]
+copyright = "Copyright 2026 cyprien"
+category = "Utility"
+short_description = "Nettoyeur d'URL et suppression de trackers"
+long_description = "Vaska est une application Android qui permet de suivre les liens de partage sur les réseaux sociaux et d'enlever les trackers."
+
+[android]
+target_sdk = 36
+icon = ["assets/app-icon.png"]
 
 [web.app]
 
 # HTML title tag content
-title = "vaskar"
+title = "Vaska"
 
 # include `assets` in web platform
 [web.resource]

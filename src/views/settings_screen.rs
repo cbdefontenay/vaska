@@ -1,8 +1,10 @@
+use crate::components::{SystemBarColor, SystemBars};
 use dioxus::prelude::*;
 
 #[component]
 pub fn SettingsScreen() -> Element {
     rsx! {
-        div { "Hi" }
+        SystemBars { color: SystemBarColor::Primary }
+        div { class: "min-h-screen w-full bg-surface pt-safe", "Hi" }
     }
 }

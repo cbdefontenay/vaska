@@ -52,6 +52,26 @@
     --color-surface-container-highest: rgb(47 54 53);
 }
 
+@utility h-safe-top {
+    height: env(safe-area-inset-top, 0px);
+}
+
+@utility h-safe-bottom {
+    height: env(safe-area-inset-bottom, 0px);
+}
+
+@utility pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+}
+
+@utility pt-safe-12 {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 3rem);
+}
+
+@utility pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 @layer base {
     html, body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;

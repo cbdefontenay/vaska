@@ -1,5 +1,7 @@
 mod components;
 mod helper_functions;
+mod icons;
+mod state;
 mod views;
 
 use crate::components::BottomBar;
@@ -29,6 +31,10 @@ fn main() {
 #[component]
 fn App() -> Element {
     rsx! {
+        document::Meta {
+            name: "viewport",
+            content: "width=device-width, initial-scale=1.0, viewport-fit=cover",
+        }
         document::Link { rel: "icon", href: FAVICON }
         document::Link { rel: "stylesheet", href: TAILWIND_CSS }
         Router::<Route> {}

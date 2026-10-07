@@ -1,190 +1,133 @@
+use crate::components::{ClearFieldButton, SystemBarColor, SystemBars};
+use crate::helper_functions::{clean_tracking_parameters, is_tiktok_short_url, resolve_tiktok_url};
+use crate::state::WARNING_MESSAGE;
 use dioxus::prelude::*;
+use reqwest::Url;
 
 #[component]
 pub fn HomeScreen() -> Element {
-    let mut url = use_signal(|| String::new());
+    let mut url = use_signal(String::new);
     let mut cleaned_url = use_signal(String::new);
     let mut tracker_origin_name = use_signal(String::new);
-
-    let mut check_if_url_contains_trackers = move |url: &str| {
-        let trackers = [
-            "?si",
-            "&si",
-            "?utm_source",
-            "&utm_source",
-            "?utm_medium",
-            "&utm_medium",
-            "?utm_campaign",
-            "&utm_campaign",
-            "?utm_term",
-            "&utm_term",
-            "?fbclid",
-            "&fbclid",
-            "?igshid",
-            "&igshid",
-            "?gclid",
-            "&gclid",
-            "&stkn",
-            "?stkn",
-            "?gbraid",
-            "&gbraid",
-            "?wbraid",
-            "&wbraid",
-            "?dclid",
-            "&dclid",
-            "?msclkid",
-            "&msclkid",
-            "?ttclid",
-            "&ttclid",
-            "?twclid",
-            "&twclid",
-            "?yclid",
-            "&yclid",
-            "?mc_eid",
-            "&mc_eid",
-            "?_openstat",
-            "&_openstat",
-        ];
-
-        for tracker in trackers {
-            if let Some((clean_url, _)) = url.split_once(tracker) {
-                match tracker {
-                    "?si" | "&si" => {
-                        tracker_origin_name.set("YouTube".to_string());
-                    }
-                    "?utm_source"
-                    | "&utm_source"
-                    | "?utm_medium"
-                    | "&utm_medium"
-                    | "?utm_campaign"
-                    | "&utm_campaign"
-                    | "?utm_term"
-                    | "&utm_term" => {
-                        tracker_origin_name.set("Article".to_string());
-                    }
-                    "?fbclid" | "&fbclid" => {
-                        tracker_origin_name.set("Facebook".to_string());
-                    }
-                    "?igshid" | "&igshid" => {
-                        tracker_origin_name.set("Instagram".to_string());
-                    }
-                    "?stkn" | "&stkn" => {
-                        tracker_origin_name.set("Instagram".to_string());
-                    }
-                    "?gclid"
-                    | "&gclid"
-                    | "?gbraid"
-                    | "&gbraid"
-                    | "?wbraid"
-                    | "&wbraid"
-                    | "?dclid"
-                    | "&dclid" => {
-                        tracker_origin_name.set("Google".to_string());
-                    }
-                    "?msclkid" | "&msclkid" => {
-                        tracker_origin_name.set("Microsoft".to_string());
-                    }
-                    "?ttclid" | "&ttclid" => {
-                        tracker_origin_name.set("TikTok".to_string());
-                    }
-                    "?twclid" | "&twclid" => {
-                        tracker_origin_name.set("Twitter/X".to_string());
-                    }
-                    "?yclid" | "&yclid" => {
-                        tracker_origin_name.set("Yandex".to_string());
-                    }
-                    "?mc_eid" | "&mc_eid" => {
-                        tracker_origin_name.set("Mailchimp".to_string());
-                    }
-                    "?_openstat" | "&_openstat" => {
-                        tracker_origin_name.set("Yandex/VK".to_string());
-                    }
-                    _ => {}
-                }
-
-                return clean_url.to_string();
-            }
-        }
-
-        tracker_origin_name.set(String::new());
-        url.to_string()
-    };
+    let mut is_loading = use_signal(|| false);
+    let mut error_message = use_signal(String::new);
 
     rsx! {
-        div {
-            class: "min-h-screen w-full bg-surface px-5 pt-12 pb-8",
-
-            div {
-                class: "mb-8",
-
-                h1 {
-                    class: "text-3xl font-bold text-secondary leading-tight",
-                    "Nettoyeur d'URL"
-                }
-
-                p {
-                    class: "mt-2 text-sm text-secondary opacity-70",
+        SystemBars { color: SystemBarColor::Scrim }
+        div { class: "min-h-screen w-full bg-surface px-5 pt-safe-12 pb-24",
+            div { class: "mb-8",
+                h1 { class: "text-3xl font-bold text-secondary leading-tight", "Nettoyeur d'URL" }
+                p { class: "mt-2 text-sm text-secondary opacity-70",
                     "Supprime les paramètres de tracking de vos liens."
                 }
             }
+            div { class: "w-full",
+                p { class: "mb-2 text-sm font-medium text-secondary", "Votre URL" }
+                div {
+                    class: "relative w-full",
 
-            div {
-                class: "w-full",
+                    input {
+                        class: "w-full h-14 rounded-2xl border border-primary bg-transparent px-4 pr-12 text-base text-secondary outline-none",
+                        placeholder: "Collez votre URL ici",
+                        r#type: "url",
+                        value: "{url}",
 
-                p {
-                    class: "mb-2 text-sm font-medium text-secondary",
-                    "Votre URL"
-                }
+                        oninput: move |evt| {
+                            url.set(evt.value());
+                            error_message.set(String::new());
+                            WARNING_MESSAGE.write().clear();
+                        },
+                    }
 
-                input {
-                    class: "w-full h-14 rounded-2xl border border-primary bg-transparent px-4 text-base text-secondary outline-none",
-                    placeholder: "Collez votre URL ici",
-                    r#type: "url",
-                    value: "{url}",
-
-                    oninput: move |evt| {
-                        url.set(evt.value());
-                    },
+                    if !url().is_empty() {
+                        ClearFieldButton {
+                            value: url,
+                        }
+                    }
                 }
 
                 button {
-                    class: "mt-4 w-full h-14 rounded-2xl bg-tertiary text-scrim text-base font-semibold active:opacity-80",
-
+                    class: "mt-4 w-full h-14 rounded-2xl bg-tertiary text-scrim text-base font-semibold active:opacity-80 disabled:opacity-50",
+                    disabled: is_loading(),
                     onclick: move |_| {
-                        let result = check_if_url_contains_trackers(&url());
-                        cleaned_url.set(result);
+                        let input_url = url();
+                        async move {
+                            error_message.set(String::new());
+                            cleaned_url.set(String::new());
+                            tracker_origin_name.set(String::new());
+                            WARNING_MESSAGE.write().clear();
+                            if input_url.trim().is_empty() {
+                                error_message.set("Veuillez saisir une URL.".to_string());
+                                return;
+                            }
+                            let input = input_url.trim();
+                            let normalized_url = if input.starts_with("https://")
+                                || input.starts_with("http://")
+                            {
+                                input.to_string()
+                            } else {
+                                format!("https://{}", input)
+                            };
+                            let parsed_url = match Url::parse(&normalized_url) {
+                                Ok(url) => url,
+                                Err(_) => {
+                                    error_message.set("L'URL n'est pas valide.".to_string());
+                                    return;
+                                }
+                            };
+                            is_loading.set(true);
+                            let final_url = if is_tiktok_short_url(&parsed_url) {
+                                match resolve_tiktok_url(parsed_url.clone()).await {
+                                    Ok(url) => url,
+                                    Err(error) => {
+                                        error_message
+                                            .set(
+                                                format!("Impossible de résoudre l'URL TikTok : {error}"),
+                                            );
+                                        is_loading.set(false);
+                                        return;
+                                    }
+                                }
+                            } else {
+                                parsed_url
+                            };
+                            let (cleaned, tracker_origin) = clean_tracking_parameters(final_url);
+                            cleaned_url.set(cleaned.to_string());
+                            if let Some(origin) = tracker_origin {
+                                tracker_origin_name.set(origin);
+                            }
+                            is_loading.set(false);
+                        }
                     },
-
-                    "Nettoyer l'URL"
+                    if is_loading() {
+                        "Nettoyage..."
+                    } else {
+                        "Nettoyer l'URL"
+                    }
                 }
             }
-
+            if !error_message().is_empty() {
+                div { class: "mt-6 w-full rounded-2xl border border-red-500 p-4",
+                    p { class: "text-sm text-red-500", "{error_message}" }
+                }
+            }
+            if !WARNING_MESSAGE().is_empty() {
+                div { class: "mt-6 w-full rounded-2xl border border-orange-500 p-4",
+                    p { class: "text-sm text-orange-500", "{WARNING_MESSAGE}" }
+                }
+            }
             if !cleaned_url().is_empty() {
-                div {
-                    class: "mt-8 w-full rounded-2xl border border-primary p-5",
-
-                    div {
-                        class: "flex items-center justify-between mb-3",
-
-                        p {
-                            class: "text-sm font-semibold text-secondary",
-                            "URL nettoyée"
-                        }
-
-                        span {
-                            class: "text-xs font-medium text-green-500",
-                            "✓ Nettoyée"
+                if WARNING_MESSAGE().is_empty() {
+                    div { class: "flex flex-col mt-8 w-full rounded-2xl border border-primary p-5",
+                        div { class: "items-center justify-between",
+                            span { class: "text-xs font-medium text-green-500", "✓ Nettoyé" }
+                            p { class: "select-all text-sm text-secondary break-all leading-relaxed",
+                                "{cleaned_url}"
+                            }
                         }
                     }
-
-                    p {
-                        class: "select-all text-sm text-secondary break-all leading-relaxed",
-                        "{cleaned_url}"
-                    }
-
                     if !tracker_origin_name().is_empty() {
-                        p {
-                            class: "mt-3 text-xs text-secondary opacity-70",
+                        p { class: "mt-3 text-xs text-secondary opacity-70",
                             "Tracking détecté : {tracker_origin_name}"
                         }
                     }

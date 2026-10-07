@@ -8,7 +8,7 @@ use Route::HomeScreen;
 pub fn BottomBar() -> Element {
     rsx! {
         BottomTabBar {
-            class: "bg-scrim text-on-surface h-16",
+            class: "bg-scrim text-on-surface h-16 pb-safe",
             item_class: "text-on-suface",
             active_class: "font-bold",
             active_indicator_class: "bg-primary",
