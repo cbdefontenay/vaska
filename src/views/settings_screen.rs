@@ -5,6 +5,6 @@ use dioxus::prelude::*;
 pub fn SettingsScreen() -> Element {
     rsx! {
         SystemBars { color: SystemBarColor::Primary }
-        div { class: "min-h-screen w-full bg-surface pt-safe", "Hi" }
+        div { class: "min-h-screen w-full bg-surface pt-safe", "Hi there!" }
     }
 }

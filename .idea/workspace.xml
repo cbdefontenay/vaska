@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="CargoProjects">
+    <cargoProject FILE="$PROJECT_DIR$/Cargo.toml">
+      <package file="$PROJECT_DIR$">
+        <feature name="default" enabled="true" />
+      </package>
+    </cargoProject>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="445ec957-76af-4e73-b4e7-8983a7040b87" name="Changes" comment="Ajout de la fonctionnalité de copie d'URL nettoyée, intégration de la bibliothèque `scraper` pour l'analyse de contenu HTML, amélioration du flux de nettoyage des URLs (notamment LinkedIn), et ajustement des styles pour les composants existants.">
+      <change beforePath="$PROJECT_DIR$/src/components/bottom_bar.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/bottom_bar.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/copy_url_button.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/copy_url_button.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/state/global_state.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/state/global_state.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/views/home_screen.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/home_screen.rs" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="38" />
+    <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="RsBuildProfile:dev" />
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Rust File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MacroExpansionManager">
+    <option name="directoryName" value="BKOszCRw" />
+  </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0000000120402708" />
+      <entry key="S10" value="1.000363621546349" />
+      <entry key="S30" value="1.35296413592962" />
+      <entry key="S60" value="2.9703937834040213" />
+      <entry key="M2" value="5.681722717433507" />
+      <entry key="M5" value="12.675643598496256" />
+      <entry key="M10" value="31.26562262541063" />
+      <entry key="M15" value="48.23122007225325" />
+      <entry key="M30" value="79.54369631116444" />
+      <entry key="H1" value="105.06937563322019" />
+      <entry key="H2" value="121.93427571533336" />
+      <entry key="H4" value="142.01892233071138" />
+      <entry key="D1" value="492.8177842797449" />
+      <entry key="W1" value="797.359765979117" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="2.4590292932122156E-212" />
+      <entry key="M5" value="3.3144353944611325E-85" />
+      <entry key="M10" value="8.086669134745373E-43" />
+      <entry key="M15" value="1.0919268265659168E-28" />
+      <entry key="M30" value="1.476834412786756E-14" />
+      <entry key="H1" value="1.7573620257923953E-7" />
+      <entry key="H2" value="7.724653991183364E-4" />
+      <entry key="H4" value="0.07556617239988896" />
+      <entry key="D1" value="5.377610484034884" />
+      <entry key="W1" value="12.167635604372279" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="0.04450156861240848" />
+      <entry key="MS500" value="0.5366301431967266" />
+      <entry key="S2" value="0.8558916037125665" />
+      <entry key="S5" value="0.9396530157533718" />
+      <entry key="S10" value="0.9697200417952824" />
+      <entry key="S30" value="1.3424525478217917" />
+      <entry key="S60" value="2.9646854673120306" />
+      <entry key="M2" value="5.67849831649139" />
+      <entry key="M5" value="12.674072719519442" />
+      <entry key="M10" value="31.264550896962998" />
+      <entry key="M15" value="48.23033794100392" />
+      <entry key="M30" value="79.54310381245658" />
+      <entry key="H1" value="105.06901921385466" />
+      <entry key="H2" value="121.93484829191438" />
+      <entry key="H4" value="142.0943116944968" />
+      <entry key="D1" value="498.19481985091085" />
+      <entry key="W1" value="809.5272260614948" />
+    </decayedShown>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5,
+  &quot;fromUser&quot;: true
+}</component>
+  <component name="ProjectId" id="3KKf0rEDixLcBSz1IGdmpI2UYey" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="autoscrollFromSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="false" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;CidrDebugProfileConversion&quot;: &quot;true&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.rust.reset.selective.auto.import&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/cyprien/Documents/android/vaska/Cargo.toml&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
+    &quot;org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon&quot;: &quot;&quot;,
+    &quot;org.rust.first.attach.projects&quot;: &quot;true&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RunManager" selected="Cargo.Run vaskar">
+    <configuration name="Run vaskar" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+      <option name="buildProfileId" value="dev" />
+      <option name="command" value="run --package vaskar --bin vaskar" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <option name="emulateTerminal" value="true" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test vaskar" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+      <option name="command" value="test --workspace" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <option name="emulateTerminal" value="true" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="RustProjectSettings">
+    <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="445ec957-76af-4e73-b4e7-8983a7040b87" name="Changes" comment="" />
+      <created>1791310960065</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1791310960065</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Suppression de l'ancien fichier SVG, mise à jour des dépendances, ajout de nouvelles fonctionnalités (gestion de l'état global, composants d'icônes, styles adaptatifs) et amélioration de la configuration de l'application." />
+    <MESSAGE value="Ajout de la fonctionnalité de copie d'URL nettoyée, intégration de la bibliothèque `scraper` pour l'analyse de contenu HTML, amélioration du flux de nettoyage des URLs (notamment LinkedIn), et ajustement des styles pour les composants existants." />
+    <option name="LAST_COMMIT_MESSAGE" value="Ajout de la fonctionnalité de copie d'URL nettoyée, intégration de la bibliothèque `scraper` pour l'analyse de contenu HTML, amélioration du flux de nettoyage des URLs (notamment LinkedIn), et ajustement des styles pour les composants existants." />
+  </component>
+</project>
