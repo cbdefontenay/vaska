@@ -1,147 +1,108 @@
 use dioxus::prelude::*;
 
-#[derive(Clone, Copy, PartialEq)]
+/// Available colors for Android system bars.
+#[derive(Clone, Debug, PartialEq)]
 pub enum SystemBarColor {
-    Scrim,
+    // Theme colors
     Primary,
+    Secondary,
+    Tertiary,
+    Surface,
+    Scrim,
+    // Predefined colors
+    Black,
+    White,
+    Red,
+    Green,
+    Blue,
+    DarkBlue,
+    Yellow,
+    Orange,
+    Purple,
+    Pink,
+    Gray,
+    // Custom hexadecimal color
+    Custom(String),
 }
-
 impl SystemBarColor {
-    fn background_class(self) -> &'static str {
+    /// Create a custom color from a hex string.
+    ///
+    /// Example:
+    /// SystemBarColor::hex("#FF5733")
+    pub fn hex(value: impl Into<String>) -> Self {
+        Self::Custom(value.into())
+    }
+    /// Convert the color to a CSS-compatible hex string.
+    pub fn as_hex(&self) -> &str {
         match self {
-            Self::Scrim => "bg-scrim",
-            Self::Primary => "bg-primary",
+            Self::Primary => "#6750A4",
+            Self::Secondary => "#625B71",
+            Self::Tertiary => "#7D5260",
+            Self::Surface => "#FFFBFE",
+            Self::Scrim => "#000000",
+            Self::Black => "#000000",
+            Self::White => "#FFFFFF",
+            Self::Red => "#F44336",
+            Self::Green => "#4CAF50",
+            Self::Blue => "#2196F3",
+            Self::DarkBlue => "#0D47A1",
+            Self::Yellow => "#FFEB3B",
+            Self::Orange => "#FF9800",
+            Self::Purple => "#9C27B0",
+            Self::Pink => "#E91E63",
+            Self::Gray => "#9E9E9E",
+            Self::Custom(value) => value.as_str(),
         }
     }
-
-    fn needs_dark_icons(self) -> bool {
-        let (red, green, blue) = match self {
-            Self::Scrim => (0u8, 0u8, 0u8),
-            Self::Primary => (128u8, 213u8, 209u8),
+    /// Determine whether dark system bar icons should be used.
+    pub fn use_dark_icons(&self) -> bool {
+        let hex = self.as_hex().trim_start_matches('#');
+        if hex.len() != 6 {
+            return false;
+        }
+        let Ok(rgb) = u32::from_str_radix(hex, 16) else {
+            return false;
         };
-        (u32::from(red) * 299 + u32::from(green) * 587 + u32::from(blue) * 114) / 1000 > 140
+        let r = ((rgb >> 16) & 0xFF) as f64;
+        let g = ((rgb >> 8) & 0xFF) as f64;
+        let b = (rgb & 0xFF) as f64;
+        let brightness = (r * 0.299 + g * 0.587 + b * 0.114) / 255.0;
+        brightness > 0.6
     }
 }
-
-/// Draws the page color behind Android's transparent system bars.
+impl From<&str> for SystemBarColor {
+    fn from(value: &str) -> Self {
+        Self::hex(value)
+    }
+}
+/// Android system bar configuration.
+///
+/// Sets the requested color for the WebView's
+/// system-bar background region and requests
+/// appropriate status-bar icon contrast.
+///
+/// Note: Android's actual system-bar appearance
+/// depends on edge-to-edge configuration and
+/// native WebView/window settings.
 #[component]
 pub fn SystemBars(color: SystemBarColor) -> Element {
-    use_effect(move || configure_edge_to_edge(color));
-    let background = color.background_class();
+    let hex_color = color.as_hex().to_string();
+    let dark_icons = color.use_dark_icons();
+    let _icon_scheme = if dark_icons { "light" } else { "dark" };
 
     rsx! {
-        div {
-            class: "pointer-events-none fixed inset-x-0 top-0 z-50 h-safe-top {background}",
-            "aria-hidden": "true",
-        }
-        div {
-            class: "pointer-events-none fixed inset-x-0 bottom-0 z-50 h-safe-bottom {background}",
-            "aria-hidden": "true",
+        Meta { name: "theme-color", content: "{hex_color}" }
+        document::Style {
+            {
+                format!(
+                    r#"
+                    hex_color,
+                    icon_scheme,
+                    "#
+                )
+            }
         }
     }
 }
 
-#[cfg(target_os = "android")]
-fn configure_edge_to_edge(color: SystemBarColor) {
-    use dioxus::mobile::wry::prelude::dispatch;
-
-    let dark_icons = color.needs_dark_icons();
-
-    dispatch(move |env, activity, _webview| {
-        let Ok(window) = env
-            .call_method(activity, "getWindow", "()Landroid/view/Window;", &[])
-            .and_then(|value| value.l())
-        else {
-            return;
-        };
-
-        // The app draws the page-colored protection behind transparent system bars.
-        let transparent = 0i32;
-        let _ = env.call_method(&window, "setStatusBarColor", "(I)V", &[transparent.into()]);
-        let _ = env.call_method(
-            &window,
-            "setNavigationBarColor",
-            "(I)V",
-            &[transparent.into()],
-        );
-
-        let sdk = env
-            .get_static_field("android/os/Build$VERSION", "SDK_INT", "I")
-            .and_then(|value| value.i())
-            .unwrap_or(0);
-
-        if sdk >= 30 {
-            let _ = env.call_method(
-                &window,
-                "setDecorFitsSystemWindows",
-                "(Z)V",
-                &[false.into()],
-            );
-        }
-
-        // Disable automatic contrast scrims so our inset backgrounds stay visible.
-        if sdk >= 29 {
-            let _ = env.call_method(
-                &window,
-                "setStatusBarContrastEnforced",
-                "(Z)V",
-                &[false.into()],
-            );
-            let _ = env.call_method(
-                &window,
-                "setNavigationBarContrastEnforced",
-                "(Z)V",
-                &[false.into()],
-            );
-        }
-
-        // Match system icon contrast to the page color.
-        if sdk >= 30 {
-            if let Ok(controller) = env
-                .call_method(
-                    &window,
-                    "getInsetsController",
-                    "()Landroid/view/WindowInsetsController;",
-                    &[],
-                )
-                .and_then(|value| value.l())
-            {
-                if !controller.is_null() {
-                    let appearance = if dark_icons { 0x8 | 0x10 } else { 0 };
-                    let _ = env.call_method(
-                        &controller,
-                        "setSystemBarsAppearance",
-                        "(II)V",
-                        &[appearance.into(), (0x8 | 0x10).into()],
-                    );
-                }
-            }
-        } else if let Ok(decor) = env
-            .call_method(&window, "getDecorView", "()Landroid/view/View;", &[])
-            .and_then(|value| value.l())
-        {
-            let layout_flags = 0x100 | 0x200 | 0x400; // stable, layout hide nav, layout fullscreen
-            let icon_flags =
-                (if sdk >= 23 { 0x2000 } else { 0 }) | (if sdk >= 26 { 0x10 } else { 0 });
-            let current = env
-                .call_method(&decor, "getSystemUiVisibility", "()I", &[])
-                .and_then(|value| value.i())
-                .unwrap_or(0);
-            let mut appearance = current | layout_flags;
-            appearance = if dark_icons {
-                appearance | icon_flags
-            } else {
-                appearance & !icon_flags
-            };
-            let _ = env.call_method(
-                &decor,
-                "setSystemUiVisibility",
-                "(I)V",
-                &[appearance.into()],
-            );
-        }
-    });
-}
-
-#[cfg(not(target_os = "android"))]
-fn configure_edge_to_edge(_color: SystemBarColor) {}
+// Anwendung 😂SystemBars { color: SystemBarColor::Scrim }

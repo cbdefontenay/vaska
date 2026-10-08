@@ -11,10 +11,7 @@ pub fn ClearFieldButton(mut value: Signal<String>) -> Element {
             onclick: move |_| {
                 value.set(String::new());
             },
-
-            CloseIcon {
-                class: "h-3 w-3"
-            }
+            CloseIcon { class: "h-3 w-3" }
         }
     }
 }

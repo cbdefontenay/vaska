@@ -1,7 +1,48 @@
 use crate::state::WARNING_MESSAGE;
 use redirect::Policy;
 use reqwest::{header, redirect, Certificate, Client, Url};
+use scraper::{Html, Selector};
 use std::error::Error;
+
+pub fn is_linkedin_short_url(url: &Url) -> bool {
+    matches!(url.host_str(), Some("lnkd.in" | "www.lnkd.in"))
+}
+
+fn extract_linkedin_destination(html: &str) -> Option<Url> {
+    let document = Html::parse_document(html);
+    let selector = Selector::parse("a[href]").ok()?;
+
+    for element in document.select(&selector) {
+        let Some(href) = element.value().attr("href") else {
+            continue;
+        };
+
+        let Ok(url) = Url::parse(href) else {
+            continue;
+        };
+
+        if !matches!(url.scheme(), "http" | "https") {
+            continue;
+        }
+
+        let Some(host) = url.host_str() else {
+            continue;
+        };
+
+        // Ignore LinkedIn's own links
+        if host == "linkedin.com"
+            || host.ends_with(".linkedin.com")
+            || host == "lnkd.in"
+            || host.ends_with(".lnkd.in")
+        {
+            continue;
+        }
+
+        return Some(url);
+    }
+
+    None
+}
 
 pub fn is_tiktok_short_url(url: &Url) -> bool {
     let Some(host) = url.host_str() else {
@@ -18,7 +59,7 @@ pub fn is_tiktok_short_url(url: &Url) -> bool {
     false
 }
 
-pub async fn resolve_tiktok_url(mut url: Url) -> dioxus::Result<Url, Box<dyn Error>> {
+pub async fn resolve_short_url(mut url: Url) -> dioxus::Result<Url, Box<dyn Error>> {
     // Sur Android, le verifier de plateformes (rustls-platform-verifier) exige une
     // initialisation JNI jamais faite ici et panique au premier handshake TLS.
     // On fournit donc les racines webpki directement au client.
@@ -44,8 +85,24 @@ pub async fn resolve_tiktok_url(mut url: Url) -> dioxus::Result<Url, Box<dyn Err
             .send()
             .await?;
 
+        if response.status().is_success() {
+            let response_url = response.url().clone();
+
+            if is_linkedin_short_url(&response_url) {
+                let html = response.text().await?;
+
+                if let Some(destination) = extract_linkedin_destination(&html) {
+                    return Ok(destination);
+                }
+
+                return Err("Impossible de trouver l'URL finale dans la page LinkedIn.".into());
+            }
+
+            return Ok(response_url);
+        }
+
         if !response.status().is_redirection() {
-            return Ok(response.url().clone());
+            return Err(format!("Réponse HTTP inattendue : {}", response.status()).into());
         }
 
         let location = response
@@ -96,7 +153,7 @@ pub fn clean_tracking_parameters(mut url: Url) -> (Url, Option<String>) {
 pub fn tracker_origin(parameter: &str) -> Option<&'static str> {
     match parameter {
         // YouTube
-        "?si" => Some("YouTube"),
+        "si" => Some("YouTube"),
         // TikTok
         "_t" | "_r" | "ttclid" => Some("TikTok"),
         // Meta
