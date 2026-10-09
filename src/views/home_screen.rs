@@ -1,6 +1,7 @@
-use crate::components::{ClearFieldButton, CopyUrlButton, SystemBarColor, SystemBars};
+use crate::components::{ClearFieldButton, CopyUrlButton, SaveUrlButton};
 use crate::helper_functions::{
-    clean_tracking_parameters, is_linkedin_short_url, is_tiktok_short_url, resolve_short_url,
+    clean_tracking_parameters, is_google_maps_short_url, is_linkedin_short_url,
+    is_tiktok_short_url, resolve_short_url,
 };
 use crate::state::WARNING_MESSAGE;
 
@@ -25,8 +26,6 @@ pub fn HomeScreen() -> Element {
         //
         // Custom color example:
         // SystemBarColor::Custom("#FF5733".to_string())
-        SystemBars { color: SystemBarColor::Scrim }
-
         div { class: "min-h-screen w-full bg-surface px-5 pt-safe-12 pb-24",
 
             // Header
@@ -108,16 +107,14 @@ pub fn HomeScreen() -> Element {
 
                             let is_tiktok = is_tiktok_short_url(&parsed_url);
                             let is_linkedin = is_linkedin_short_url(&parsed_url);
+                            let is_google_maps = is_google_maps_short_url(&parsed_url);
 
-                            // Resolve TikTok short URLs
-                            let final_url = if is_tiktok || is_linkedin {
+                            let final_url = if is_tiktok || is_linkedin || is_google_maps {
                                 match resolve_short_url(parsed_url.clone()).await {
                                     Ok(url) => url,
-
                                     Err(error) => {
                                         error_message
                                             .set(format!("Impossible de résoudre l'URL : {error}"));
-
                                         is_loading.set(false);
                                         return;
                                     }
@@ -187,7 +184,17 @@ pub fn HomeScreen() -> Element {
                             }
                         }
 
-                        CopyUrlButton { value: cleaned_url() }
+                        div { class: "mt-4 flex gap-3 w-full",
+                            CopyUrlButton {
+                                value: cleaned_url(),
+                                class: "flex-1 h-14 rounded-2xl bg-primary text-on-primary text-base font-semibold active:opacity-80 disabled:opacity-50".to_string(),
+                            }
+
+                            SaveUrlButton {
+                                value: cleaned_url(),
+                                class: "flex-1 h-14 rounded-2xl bg-tertiary text-scrim text-base font-semibold active:opacity-80 disabled:opacity-50".to_string(),
+                            }
+                        }
                     }
 
                     // Tracking origin

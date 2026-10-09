@@ -12,9 +12,8 @@ Sur le principe, c'est très simple. Cette application est crée avec les techno
 2. Ne jamais utiliser de **JS** dans le code, sauf si je te le demande moi-même dans une mission. Utilise toujours **Rust**.
 3. Je n'aime pas les fichiers très longs en code, donc j'aime créer plusieurs components réutilisables où qui peuvent permettre de réduire la taille du code.
 4. Ne crée **JAMAIS** du code dans un fichier `mod.rs`. Ces fichiers permettent simplement l'export des fonctions.
+5. Reste **TOUJOURS** dans le `path` du projet `Vaska`, ne va jamais voir ailleur sur mon odinateur.
 
 # Ta mission :
 
-Je veux que tu crées un bouton, en-dessous de l'URl nettoyé, qui permet de copier l'url nettoyé directement. Ensuite, je souhaiterais que cette application puisse apparaître dans les
-choix d'applications lorsque je veux partager un lien avec des amis par exemple, que Vaska soit un choix, pour que l'URl soit d'abord nettoyé, puis je peux le partager.
-Pour cette dernière chose, ne crée pas de code pour le moment, mais crée seulement un plan de tes idées pour y parvenir dans un fichier nommé `PARTAGE.md`.
+Dans le fichier `db_connect.rs` j'ai ajouté une connection SQLite à sqlx. Mais je pense qu'utiliser `fullstack` et desfonctions server, ce n'est pas nécessaire. Si tu penses que c'est nécessaire, alors change, sinon, enlève le fullstack. Mais je souhaite pouvoir ajouter un bouton `Enregistrer URL` à côté de celui qui permet de copier l'URL nettoyé. Les URLs enregistrés seront ensuite affichés dans la page `url_saver.rs`.

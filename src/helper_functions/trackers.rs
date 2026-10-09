@@ -8,6 +8,10 @@ pub fn is_linkedin_short_url(url: &Url) -> bool {
     matches!(url.host_str(), Some("lnkd.in" | "www.lnkd.in"))
 }
 
+pub fn is_google_maps_short_url(url: &Url) -> bool {
+    matches!(url.host_str(), Some("maps.app.goo.gl" | "goo.gl"))
+}
+
 fn extract_linkedin_destination(html: &str) -> Option<Url> {
     let document = Html::parse_document(html);
     let selector = Selector::parse("a[href]").ok()?;
@@ -165,6 +169,7 @@ pub fn tracker_origin(parameter: &str) -> Option<&'static str> {
         "msclkid" => Some("Microsoft"),
         // Twitter / X
         "twclid" => Some("Twitter/X"),
+        "entry" | "g_ep" => Some("Google Maps"),
         // Yandex
         "yclid" => Some("Yandex"),
         // Mailchimp

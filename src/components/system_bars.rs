@@ -1,3 +1,4 @@
+use crate::helper_functions::configure_system_bars;
 use dioxus::prelude::*;
 
 /// Available colors for Android system bars.
@@ -75,34 +76,36 @@ impl From<&str> for SystemBarColor {
         Self::hex(value)
     }
 }
-/// Android system bar configuration.
+
+/// Android system bars.
 ///
-/// Sets the requested color for the WebView's
-/// system-bar background region and requests
-/// appropriate status-bar icon contrast.
-///
-/// Note: Android's actual system-bar appearance
-/// depends on edge-to-edge configuration and
-/// native WebView/window settings.
+/// Android draws its status and navigation bars as a transparent layer on top
+/// of the WebView, so the visible color comes from the page underneath. This
+/// component makes those bars transparent (see [`configure_system_bars`]) and
+/// paints the requested color into the top and bottom safe-area insets, so the
+/// system bars always match the current page. It also exposes a `theme-color`
+/// for browsers and PWAs.
 #[component]
 pub fn SystemBars(color: SystemBarColor) -> Element {
     let hex_color = color.as_hex().to_string();
-    let dark_icons = color.use_dark_icons();
-    let _icon_scheme = if dark_icons { "light" } else { "dark" };
+
+    // Apply the transparent / edge-to-edge window configuration on Android.
+    use_effect(move || configure_system_bars(&color));
 
     rsx! {
-        Meta { name: "theme-color", content: "{hex_color}" }
-        document::Style {
-            {
-                format!(
-                    r#"
-                    hex_color,
-                    icon_scheme,
-                    "#
-                )
-            }
+        document::Meta { name: "theme-color", content: "{hex_color}" }
+
+        // Status bar (top safe area)
+        div {
+            class: "pointer-events-none fixed inset-x-0 top-0 z-50 h-safe-top",
+            style: "background-color: {hex_color};",
+            "aria-hidden": "true",
         }
+        // Navigation bar (bottom safe area)
+        // div {
+        //     class: "pointer-events-none fixed inset-x-0 bottom-0 z-50 h-safe-bottom",
+        //     style: "background-color: {hex_color};",
+        //     "aria-hidden": "true",
+        // }
     }
 }
-
-// Anwendung 😂SystemBars { color: SystemBarColor::Scrim }

@@ -1,11 +1,12 @@
 mod components;
+mod database;
 mod helper_functions;
 mod icons;
 mod state;
 mod views;
 
-use crate::components::BottomBar;
-use crate::views::{HomeScreen, SettingsScreen};
+use crate::components::{BottomBar, SystemBarColor, SystemBars};
+use crate::views::{HomeScreen, SettingsScreen, UrlSaverScreen};
 use dioxus::prelude::*;
 
 #[derive(Debug, Clone, Routable, PartialEq)]
@@ -14,6 +15,8 @@ enum Route {
     #[layout(BottomBar)]
     #[route("/")]
     HomeScreen {},
+    #[route("/url-saver")]
+    UrlSaverScreen {},
     #[route("/parametres")]
     SettingsScreen {},
 }
@@ -37,6 +40,7 @@ fn App() -> Element {
         }
         document::Link { rel: "icon", href: FAVICON }
         document::Link { rel: "stylesheet", href: TAILWIND_CSS }
+        SystemBars { color: SystemBarColor::Black }
         Router::<Route> {}
     }
 }

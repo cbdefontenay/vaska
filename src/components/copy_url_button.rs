@@ -1,20 +1,22 @@
+use crate::components::ActionButton;
 use dioxus::prelude::*;
 
+/// Copie l'URL nettoyée dans le presse-papiers.
 #[component]
-pub fn CopyUrlButton(value: String) -> Element {
+pub fn CopyUrlButton(value: String, class: Option<String>) -> Element {
     rsx! {
-        button {
-            class: "mt-4 w-full h-14 rounded-2xl bg-primary text-on-primary text-base font-semibold active:opacity-80",
-            r#type: "button",
+        ActionButton {
+            label: "Copier l'URL nettoyée".to_string(),
+            class,
+            disabled: false,
             onclick: move |_| copy_to_clipboard(value.clone()),
-            "Copier l'URL nettoyée"
         }
     }
 }
 
 #[cfg(target_os = "android")]
-fn copy_to_clipboard(value: String) {
-    use dioxus::mobile::wry::prelude::{JObject, dispatch};
+pub fn copy_to_clipboard(value: String) {
+    use dioxus::mobile::wry::prelude::{dispatch, JObject};
 
     dispatch(move |env, activity, _webview| {
         let Ok(service_name) = env.new_string("clipboard") else {
@@ -63,4 +65,4 @@ fn copy_to_clipboard(value: String) {
 }
 
 #[cfg(not(target_os = "android"))]
-fn copy_to_clipboard(_value: String) {}
+pub fn copy_to_clipboard(_value: String) {}

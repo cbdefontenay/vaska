@@ -1,5 +1,5 @@
-use crate::Route;
 use crate::Route::SettingsScreen;
+use crate::Route::{self, UrlSaverScreen};
 use androxus::prelude::*;
 use dioxus::prelude::*;
 use Route::HomeScreen;
@@ -20,6 +20,13 @@ pub fn BottomBar() -> Element {
                     },
                     title: "".to_string(),
                     route: HomeScreen {},
+                },
+                BottomTabItem {
+                    icon: rsx! {
+                        SearchIcon { class : "w-6 h-6".to_string() }
+                    },
+                    title: "".to_string(),
+                    route: UrlSaverScreen {},
                 },
                 BottomTabItem {
                     icon: rsx! {
