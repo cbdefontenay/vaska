@@ -1,7 +1,5 @@
-use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
-use sqlx::{query, query_as, Error, SqlitePool};
 use std::sync::OnceLock;
-use std::{fs::create_dir_all, str::FromStr};
+use turso::{Builder, Connection, Database, Error, Result, Value};
 
 /// URL enregistrée dans la base de données locale.
 #[derive(Debug, Clone, PartialEq)]
@@ -10,77 +8,79 @@ pub struct SavedUrl {
     pub url: String,
 }
 
-static POOL: OnceLock<SqlitePool> = OnceLock::new();
+static DB: OnceLock<Database> = OnceLock::new();
 
 #[cfg(target_os = "android")]
-fn database_url() -> String {
+fn database_path() -> String {
     // Sur Android, le répertoire de travail courant n'est pas accessible en
     // écriture : on utilise le répertoire privé de l'application.
 
     let data_dir = "/data/data/com.cyprien.vaska/files";
-    let _ = create_dir_all(data_dir);
-    format!("sqlite://{data_dir}/vaska.db?mode=rwc")
+    let _ = std::fs::create_dir_all(data_dir);
+    format!("{data_dir}/vaska.db")
 }
 
 #[cfg(not(target_os = "android"))]
-fn database_url() -> String {
-    "sqlite://vaska.db?mode=rwc".to_string()
+fn database_path() -> String {
+    "vaska.db".to_string()
 }
 
-async fn pool() -> Result<SqlitePool, Error> {
-    if let Some(pool) = POOL.get() {
-        return Ok(pool.clone());
+async fn connection() -> Result<Connection> {
+    if let Some(db) = DB.get() {
+        return db.connect();
     }
 
-    let options =
-        SqliteConnectOptions::from_str(&database_url()).expect("URL de base de données invalide");
-    let pool = SqlitePoolOptions::new()
-        .max_connections(1)
-        .connect_with(options)
-        .await?;
+    let db = Builder::new_local(&database_path()).build().await?;
+    let conn = db.connect()?;
 
-    query(
+    conn.execute(
         "CREATE TABLE IF NOT EXISTS urls (
             id  INTEGER PRIMARY KEY AUTOINCREMENT,
             url TEXT NOT NULL
         );",
+        (),
     )
-    .execute(&pool)
     .await?;
 
-    let _ = POOL.set(pool.clone());
-    Ok(pool)
+    let _ = DB.set(db);
+    Ok(conn)
 }
 
 /// Insère une nouvelle URL et retourne l'id généré.
-pub async fn insert_url(url: &str) -> Result<i64, Error> {
-    let pool = pool().await?;
-    let result = query("INSERT INTO urls (url) VALUES (?1)")
-        .bind(url)
-        .execute(&pool)
+pub async fn insert_url(url: &str) -> Result<i64> {
+    let conn = connection().await?;
+    conn.execute("INSERT INTO urls (url) VALUES (?1)", (url,))
         .await?;
-    Ok(result.last_insert_rowid())
+    Ok(conn.last_insert_rowid())
 }
 
 /// Récupère toutes les URLs enregistrées, de la plus récente à la plus ancienne.
-pub async fn list_urls() -> Result<Vec<SavedUrl>, Error> {
-    let pool = pool().await?;
-    let rows = query_as::<_, (i64, String)>("SELECT id, url FROM urls ORDER BY id DESC")
-        .fetch_all(&pool)
+pub async fn list_urls() -> Result<Vec<SavedUrl>> {
+    let conn = connection().await?;
+    let mut rows = conn
+        .query("SELECT id, url FROM urls ORDER BY id DESC", ())
         .await?;
 
-    Ok(rows
-        .into_iter()
-        .map(|(id, url)| SavedUrl { id, url })
-        .collect())
+    let mut saved_urls = Vec::new();
+    while let Some(row) = rows.next().await? {
+        let (id, url) = match (row.get_value(0)?, row.get_value(1)?) {
+            (Value::Integer(id), Value::Text(url)) => (id, url),
+            _ => {
+                return Err(Error::ConversionFailure(
+                    "types inattendus dans la table urls".to_string(),
+                ));
+            }
+        };
+        saved_urls.push(SavedUrl { id, url });
+    }
+
+    Ok(saved_urls)
 }
 
 /// Supprime une URL enregistrée.
-pub async fn delete_url(id: i64) -> Result<(), Error> {
-    let pool = pool().await?;
-    query("DELETE FROM urls WHERE id = ?1")
-        .bind(id)
-        .execute(&pool)
+pub async fn delete_url(id: i64) -> Result<()> {
+    let conn = connection().await?;
+    conn.execute("DELETE FROM urls WHERE id = ?1", (id,))
         .await?;
     Ok(())
 }

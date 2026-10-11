@@ -16,4 +16,4 @@ Sur le principe, c'est très simple. Cette application est crée avec les techno
 
 # Ta mission :
 
-Dans le fichier `db_connect.rs` j'ai ajouté une connection SQLite à sqlx. Mais je pense qu'utiliser `fullstack` et desfonctions server, ce n'est pas nécessaire. Si tu penses que c'est nécessaire, alors change, sinon, enlève le fullstack. Mais je souhaite pouvoir ajouter un bouton `Enregistrer URL` à côté de celui qui permet de copier l'URL nettoyé. Les URLs enregistrés seront ensuite affichés dans la page `url_saver.rs`.
+Au lieu de `sqlx`, je voeux maintenant utiliser `turso db`. Remplace sqlx par Turso
