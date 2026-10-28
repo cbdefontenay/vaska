@@ -8,7 +8,7 @@ You can add Dioxus to your `Cargo.toml` like this:
 
 ```toml
 [dependencies]
-dioxus = { version = "0.8.0-alpha.0" }
+dioxus = { version = "0.8.0-alpha.3" }
 
 [features]
 default = ["web", "webview", "server"]

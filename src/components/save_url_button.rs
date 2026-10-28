@@ -1,15 +1,17 @@
 use crate::components::ActionButton;
 use crate::database;
+use crate::i18n::use_lang;
 use dioxus::prelude::*;
 
 /// Enregistre l'URL nettoyée dans la base de données locale.
 #[component]
 pub fn SaveUrlButton(value: String, class: Option<String>) -> Element {
+    let lang = use_lang();
     let mut saved = use_signal(|| false);
     let label = if saved() {
-        "Enregistré".to_string()
+        lang.t("saved")
     } else {
-        "Enregistrer URL".to_string()
+        lang.t("save_url")
     };
 
     rsx! {

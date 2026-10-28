@@ -1,31 +1,42 @@
-use crate::components::SavedUrlCard;
+use crate::components::{AppHeader, LoadingSpinner, SavedUrlCard};
 use crate::database;
+use crate::i18n::use_lang;
+use crate::icons::ArchiveIcon;
 use dioxus::prelude::*;
 
 #[component]
 pub fn UrlSaverScreen() -> Element {
+    let lang = use_lang();
     let mut urls = use_resource(|| async move { database::list_urls().await.unwrap_or_default() });
 
     rsx! {
         div { class: "min-h-screen w-full bg-surface px-5 pt-safe-12 pb-24",
-
             // Header
-            div { class: "mb-8",
-                h1 { class: "text-3xl font-bold text-secondary leading-tight", "URLs enregistrées" }
-
-                p { class: "mt-2 text-sm text-secondary opacity-70",
-                    "Retrouvez ici les URLs nettoyées que vous avez enregistrées."
-                }
+            AppHeader {
+                title: lang.t("urls_saved"),
+                description: lang.t("urls_saved_description"),
             }
 
             match urls() {
                 None => rsx! {
-                    p { class: "text-sm text-secondary opacity-70", "Chargement..." }
+                    div { class: "flex flex-col items-center justify-center py-20 gap-4",
+                        LoadingSpinner {}
+                        p { class: "text-sm text-on-surface-variant", {lang.t("loading")} }
+                    }
                 },
 
                 Some(saved_urls) if saved_urls.is_empty() => rsx! {
-                    p { class: "text-sm text-secondary opacity-70",
-                        "Aucune URL enregistrée pour le moment."
+                    div { class: "flex flex-col items-center justify-center py-20 gap-4",
+                        // Illustration vide
+                        div { class: "w-20 h-20 rounded-3xl bg-surface-container-high flex items-center justify-center",
+                            ArchiveIcon { class: "w-10 h-10 text-on-surface-variant opacity-50" }
+                        }
+                        div { class: "text-center",
+                            p { class: "text-base font-medium text-on-surface mb-1", {lang.t("no_saved_urls")} }
+                            p { class: "text-sm text-on-surface-variant",
+                                {lang.t("no_saved_urls_description")}
+                            }
+                        }
                     }
                 },
 
@@ -43,7 +54,7 @@ pub fn UrlSaverScreen() -> Element {
                                             urls.restart();
                                         }
                                     });
-                                }
+                                },
                             }
                         }
                     }

@@ -72,6 +72,15 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 @layer base {
     html, body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -80,5 +89,9 @@
         margin: 0;
         padding: 0;
         box-sizing: border-box;
+    }
+
+    .animate-spin {
+        animation: spin 1s linear infinite;
     }
 }

@@ -1,11 +1,13 @@
 mod components;
 mod database;
 mod helper_functions;
+mod i18n;
 mod icons;
 mod state;
 mod views;
 
 use crate::components::{BottomBar, SystemBarColor, SystemBars};
+use crate::i18n::LangContextProvider;
 use crate::views::{HomeScreen, SettingsScreen, UrlSaverScreen};
 use dioxus::prelude::*;
 
@@ -39,8 +41,10 @@ fn App() -> Element {
             content: "width=device-width, initial-scale=1.0, viewport-fit=cover",
         }
         document::Link { rel: "icon", href: FAVICON }
-        document::Link { rel: "stylesheet", href: TAILWIND_CSS }
         SystemBars { color: SystemBarColor::Black }
-        Router::<Route> {}
+        LangContextProvider {
+            Router::<Route> {}
+        }
+        document::Link { rel: "stylesheet", href: TAILWIND_CSS }
     }
 }

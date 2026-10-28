@@ -6,12 +6,14 @@ edition = "2021"
 
 
 [dependencies]
-dioxus = { version = "0.8.0-alpha.1", features = ["router"] }
+dioxus = { version = "0.8.0-alpha.3", features = ["router"] }
 androxus = "0.1.7"
 reqwest = { version = "0.13.5", features = ["json", "rustls"] }
 webpki-root-certs = "1.0.9"
-scraper = "0.27.0"
-turso = "0.8.2"
+scraper = "0.29.0"
+turso = "0.8.3"
+webbrowser = "1.2.5"
+chrono = "0.4.45"
 
 [features]
 default = ["mobile"]

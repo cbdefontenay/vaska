@@ -1,8 +1,25 @@
-use crate::state::WARNING_MESSAGE;
 use redirect::Policy;
 use reqwest::{header, redirect, Certificate, Client, Url};
 use scraper::{Html, Selector};
 use std::error::Error;
+
+pub fn is_facebook_short_url(url: &Url) -> bool {
+    matches!(url.host_str(), Some("facebook.com" | "www.facebook.com"))
+}
+
+pub fn is_amazon_marketplace_short_url(url: &Url) -> bool {
+    matches!(
+        url.host_str(),
+        Some("amzn.eu" | "www.amzn.eu" | "amzn.com" | "www.amzn.com")
+    )
+}
+
+pub fn is_deezer_short_url(url: &Url) -> bool {
+    matches!(
+        url.host_str(),
+        Some("link.deezer.com" | "www.link.deezer.com")
+    )
+}
 
 pub fn is_linkedin_short_url(url: &Url) -> bool {
     matches!(url.host_str(), Some("lnkd.in" | "www.lnkd.in"))
@@ -121,15 +138,16 @@ pub async fn resolve_short_url(mut url: Url) -> dioxus::Result<Url, Box<dyn Erro
     Err("Trop de redirections".into())
 }
 
-pub fn clean_tracking_parameters(mut url: Url) -> (Url, Option<String>) {
+pub fn clean_tracking_parameters(mut url: Url) -> (Url, Option<String>, bool) {
     let mut detected_origin: Option<String> = None;
+    let host = url.host_str().unwrap_or("").to_string();
     let parameters: Vec<(String, String)> = url
         .query_pairs()
         .map(|(key, value)| (key.into_owned(), value.into_owned()))
         .collect();
     let mut remaining_parameters = Vec::new();
     for (key, value) in parameters {
-        if let Some(origin) = tracker_origin(&key) {
+        if let Some(origin) = tracker_origin(&key, &host) {
             if detected_origin.is_none() {
                 detected_origin = Some(origin.to_string());
             }
@@ -137,12 +155,7 @@ pub fn clean_tracking_parameters(mut url: Url) -> (Url, Option<String>) {
         }
         remaining_parameters.push((key, value));
     }
-    if detected_origin.is_none() {
-        *WARNING_MESSAGE.write() =
-            "L'URL ne semble pas contenir de tracker dans ses paramètres.".to_string();
-    } else {
-        WARNING_MESSAGE.write().clear();
-    }
+    let has_no_trackers = detected_origin.is_none();
     url.set_query(None);
     if !remaining_parameters.is_empty() {
         let mut query = url.query_pairs_mut();
@@ -151,24 +164,31 @@ pub fn clean_tracking_parameters(mut url: Url) -> (Url, Option<String>) {
         }
     }
     url.set_fragment(None);
-    (url, detected_origin)
+    (url, detected_origin, has_no_trackers)
 }
 
-pub fn tracker_origin(parameter: &str) -> Option<&'static str> {
+pub fn tracker_origin(parameter: &str, host: &str) -> Option<&'static str> {
     match parameter {
-        // YouTube
-        "si" => Some("YouTube"),
+        // YouTube / Spotify
+        "si" | "playnext" => match host {
+            "open.spotify.com" => Some("Spotify"),
+            "youtube.com" | "www.youtube.com" | "m.youtube.com" | "music.youtube.com"
+            | "youtu.be" => Some("YouTube"),
+            _ => Some("Inconnu"),
+        },
         // TikTok
         "_t" | "_r" | "ttclid" => Some("TikTok"),
+        "li_fat_id" => Some("LinkedIn"),
         // Meta
         "fbclid" => Some("Facebook"),
-        "igshid" | "stkn" => Some("Instagram"),
+        "igshid" | "stkn" | "obrf" | "is" => Some("Instagram"),
         // Google
         "gclid" | "gbraid" | "wbraid" | "dclid" => Some("Google"),
         // Microsoft
         "msclkid" => Some("Microsoft"),
         // Twitter / X
         "twclid" => Some("Twitter/X"),
+        // Google Maps
         "entry" | "g_ep" => Some("Google Maps"),
         // Yandex
         "yclid" => Some("Yandex"),
@@ -176,6 +196,14 @@ pub fn tracker_origin(parameter: &str) -> Option<&'static str> {
         "mc_eid" => Some("Mailchimp"),
         // OpenStat
         "_openstat" => Some("Yandex/VK"),
+        "_encoding" | "pd_rd_w" | "content-id" | "pd_rd_r" | "ref_" | "social_share" => {
+            Some("Amazon")
+        }
+        "marketplaceId" | "musicTerritory" | "ref" => match host {
+            "music.amazon.com" => Some("Amazon Music"),
+            "amazon.com" => Some("Amazon"),
+            _ => Some("Inconnu"),
+        },
         // UTM
         "utm_source"
         | "utm_medium"
@@ -185,7 +213,10 @@ pub fn tracker_origin(parameter: &str) -> Option<&'static str> {
         | "utm_id"
         | "utm_source_platform"
         | "utm_creative_format"
-        | "utm_marketing_tactic" => Some("UTM"),
+        | "utm_marketing_tactic" => match host {
+            "kleinanzeigen.de" | "www.kleinanzeigen.de" => Some("Kleinanzeigen"),
+            _ => Some("UTM/Marketing"),
+        },
         _ => None,
     }
 }
