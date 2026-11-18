@@ -28,7 +28,7 @@ pub fn SettingsScreen() -> Element {
                     div {
                         class: format!(
                             "flex items-center justify-between px-4 py-4 cursor-pointer {}",
-                            if current_lang == AppLanguage::French { "bg-primary/10" } else { "" }
+                            if current_lang == AppLanguage::French { "bg-primary/10" } else { "" },
                         ),
                         onclick: move |_| {
                             lang.set_language(AppLanguage::French);
@@ -52,7 +52,7 @@ pub fn SettingsScreen() -> Element {
                     div {
                         class: format!(
                             "flex items-center justify-between px-4 py-4 cursor-pointer {}",
-                            if current_lang == AppLanguage::German { "bg-primary/10" } else { "" }
+                            if current_lang == AppLanguage::German { "bg-primary/10" } else { "" },
                         ),
                         onclick: move |_| {
                             lang.set_language(AppLanguage::German);
@@ -122,7 +122,9 @@ pub fn SettingsScreen() -> Element {
                                 p { class: "text-sm font-medium text-on-surface",
                                     {lang.t("technology")}
                                 }
-                                p { class: "text-xs text-on-surface-variant", {lang.t("tech_description")} }
+                                p { class: "text-xs text-on-surface-variant",
+                                    {lang.t("tech_description")}
+                                }
                             }
                         }
                     }
@@ -176,7 +178,9 @@ pub fn SettingsScreen() -> Element {
                             LockIcon { class: "w-5 h-5 text-on-surface-variant" }
                         }
                         div {
-                            p { class: "text-sm font-medium text-on-surface", {lang.t("local_storage")} }
+                            p { class: "text-sm font-medium text-on-surface",
+                                {lang.t("local_storage")}
+                            }
                             p { class: "text-xs text-on-surface-variant",
                                 {lang.t("local_storage_description")}
                             }

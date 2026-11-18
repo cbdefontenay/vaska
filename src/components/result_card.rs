@@ -70,7 +70,9 @@ pub fn ResultCard(cleaned_url: String, tracker_origin: Option<String>, show_warn
                 div { class: "mt-4 flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary-container/50",
                     WarningIcon { class: "w-4 h-4 text-on-secondary-container" }
 
-                    p { class: "text-xs text-on-secondary-container", {lang.t_with("tracking_detected", origin)} }
+                    p { class: "text-xs text-on-secondary-container",
+                        {lang.t_with("tracking_detected", origin)}
+                    }
                 }
             }
         }

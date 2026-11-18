@@ -36,15 +36,13 @@ fn main() {
 #[component]
 fn App() -> Element {
     rsx! {
-        document::Meta {
+        document::Link { rel: "stylesheet", href: TAILWIND_CSS }
+        Meta {
             name: "viewport",
             content: "width=device-width, initial-scale=1.0, viewport-fit=cover",
         }
-        document::Link { rel: "icon", href: FAVICON }
         SystemBars { color: SystemBarColor::Black }
-        LangContextProvider {
-            Router::<Route> {}
-        }
-        document::Link { rel: "stylesheet", href: TAILWIND_CSS }
+        LangContextProvider { Router::<Route> {} }
+        document::Link { rel: "icon", href: FAVICON }
     }
 }

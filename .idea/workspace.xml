@@ -11,31 +11,19 @@
     </cargoProject>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="445ec957-76af-4e73-b4e7-8983a7040b87" name="Changes" comment="Ajout de la fonctionnalité de copie d'URL nettoyée, intégration de la bibliothèque `scraper` pour l'analyse de contenu HTML, amélioration du flux de nettoyage des URLs (notamment LinkedIn), et ajustement des styles pour les composants existants.">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/app_header.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/loading_spinner.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/result_card.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/url_input_field.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/translations/de.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/translations/fr.json" afterDir="false" />
+    <list default="true" id="445ec957-76af-4e73-b4e7-8983a7040b87" name="Changes" comment="Ajout du contexte de langue et des traductions (français et allemand), mise à jour des dépendances, amélioration de l'interface utilisateur avec localisation des textes et refactoring des icônes.">
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/AGENTS.md" beforeDir="false" afterPath="$PROJECT_DIR$/AGENTS.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VASKA.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/save_url_button.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/save_url_button.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/saved_url_card.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/saved_url_card.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Dioxus.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Dioxus.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/result_card.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/result_card.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/helper_functions/trackers.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/helper_functions/trackers.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/icons/app_icons.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/icons/app_icons.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/icons/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/icons/mod.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/views/home_screen.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/home_screen.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/views/settings_screen.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/settings_screen.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/views/url_saver_screen.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/url_saver_screen.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tailwind.css" beforeDir="false" afterPath="$PROJECT_DIR$/tailwind.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,7 +31,6 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="38" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="RsBuildProfile:dev" />
@@ -78,23 +65,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.823674607719519" />
-      <entry key="MS500" value="4.720687561527623" />
-      <entry key="S2" value="7.9468437804919905" />
-      <entry key="S5" value="9.087866083368834" />
-      <entry key="S10" value="9.52704443338701" />
-      <entry key="S30" value="9.900605424252264" />
-      <entry key="S60" value="12.52694885600972" />
-      <entry key="M2" value="28.99027918563996" />
-      <entry key="M5" value="83.21467324716002" />
-      <entry key="M10" value="133.11486591282772" />
-      <entry key="M15" value="158.26030603056373" />
-      <entry key="M30" value="190.17559788666938" />
-      <entry key="H1" value="219.37820420969518" />
-      <entry key="H2" value="285.04402333762806" />
-      <entry key="H4" value="394.641569947116" />
-      <entry key="D1" value="890.3014279905595" />
-      <entry key="W1" value="1283.266457293217" />
+      <entry key="MS100" value="1.0228765266520905" />
+      <entry key="MS500" value="1.5301750959118516" />
+      <entry key="S2" value="3.014185817069136" />
+      <entry key="S5" value="5.149723739383774" />
+      <entry key="S10" value="6.90227813711845" />
+      <entry key="S30" value="8.757834786096105" />
+      <entry key="S60" value="9.370951654588241" />
+      <entry key="M2" value="10.311047149889204" />
+      <entry key="M5" value="15.38631462975618" />
+      <entry key="M10" value="23.233839857650636" />
+      <entry key="M15" value="30.030030687437247" />
+      <entry key="M30" value="59.48528953596432" />
+      <entry key="H1" value="136.2836061408386" />
+      <entry key="H2" value="263.58382598607267" />
+      <entry key="H4" value="432.3086101479939" />
+      <entry key="D1" value="1032.9431385936487" />
+      <entry key="W1" value="1475.6157001172237" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -102,37 +89,37 @@
       <entry key="S2" value="0.0" />
       <entry key="S5" value="0.0" />
       <entry key="S10" value="0.0" />
-      <entry key="S30" value="2.815522720013314E-184" />
-      <entry key="S60" value="1.6779821894769048E-92" />
-      <entry key="M2" value="1.3031342273075645E-46" />
-      <entry key="M5" value="5.280043574598391E-19" />
-      <entry key="M10" value="1.0803523689533238E-9" />
-      <entry key="M15" value="1.4634412074605925E-6" />
-      <entry key="M30" value="0.0020575026424480636" />
-      <entry key="H1" value="0.07822036471059579" />
-      <entry key="H2" value="0.484010472645365" />
-      <entry key="H4" value="1.2332798551254822" />
-      <entry key="D1" value="7.153882999729323" />
-      <entry key="W1" value="14.826224983754686" />
+      <entry key="S30" value="9.19546345546759E-263" />
+      <entry key="S60" value="9.589470777886633E-132" />
+      <entry key="M2" value="3.1152492380523464E-66" />
+      <entry key="M5" value="7.482366299776981E-27" />
+      <entry key="M10" value="1.2860745908444525E-13" />
+      <entry key="M15" value="3.5414063845879532E-9" />
+      <entry key="M30" value="1.012140130846402E-4" />
+      <entry key="H1" value="0.017348820680177353" />
+      <entry key="H2" value="0.2279448683170284" />
+      <entry key="H4" value="0.8463483814705617" />
+      <entry key="D1" value="6.718769697226951" />
+      <entry key="W1" value="14.693911915820108" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.6832953095648067" />
-      <entry key="MS500" value="4.641999749080307" />
-      <entry key="S2" value="7.914406343863812" />
-      <entry key="S5" value="9.073156116750903" />
-      <entry key="S10" value="9.519358606408554" />
-      <entry key="S30" value="9.897953161890083" />
-      <entry key="S60" value="12.525332108050979" />
-      <entry key="M2" value="28.98850303129986" />
-      <entry key="M5" value="83.21262721383677" />
-      <entry key="M10" value="133.11321310930384" />
-      <entry key="M15" value="158.25899206100843" />
-      <entry key="M30" value="190.1768485481435" />
-      <entry key="H1" value="219.45574483694523" />
-      <entry key="H2" value="285.527088947345" />
-      <entry key="H4" value="395.8738354566512" />
-      <entry key="D1" value="897.4545130928663" />
-      <entry key="W1" value="1298.0924611172163" />
+      <entry key="MS100" value="0.9539382798941209" />
+      <entry key="MS500" value="1.5069452755964856" />
+      <entry key="S2" value="3.002408082722325" />
+      <entry key="S5" value="5.141670738347206" />
+      <entry key="S10" value="6.8968263799570195" />
+      <entry key="S30" value="8.75550333799769" />
+      <entry key="S60" value="9.36970037218954" />
+      <entry key="M2" value="10.310360009503418" />
+      <entry key="M5" value="15.385915666002752" />
+      <entry key="M10" value="23.233547135561647" />
+      <entry key="M15" value="30.02977883265741" />
+      <entry key="M30" value="59.485126902593834" />
+      <entry key="H1" value="136.30058961970175" />
+      <entry key="H2" value="263.8111585854484" />
+      <entry key="H4" value="433.1541551111274" />
+      <entry key="D1" value="1039.6611366396594" />
+      <entry key="W1" value="1490.3093895379873" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -149,33 +136,34 @@
     <option name="showExcludedFiles" value="false" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "CidrDebugProfileConversion": "true",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.rust.reset.selective.auto.import": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "main",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "/home/cyprien/Documents/android/vaska/Cargo.toml",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
-    "org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon": "",
-    "org.rust.first.attach.projects": "true",
-    "to.speed.mode.migration.done": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;CidrDebugProfileConversion&quot;: &quot;true&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.rust.reset.selective.auto.import&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/cyprien/Documents/android/vaska/Cargo.toml&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
+    &quot;org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon&quot;: &quot;&quot;,
+    &quot;org.rust.first.attach.projects&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;ml.llm.LLMThirdPartyAiProvidersConfigurable&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Cargo.Run vaskar">
     <configuration name="Run vaskar" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="buildProfileId" value="dev" />
@@ -232,6 +220,11 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Suppression de l'ancien fichier SVG, mise à jour des dépendances, ajout de nouvelles fonctionnalités (gestion de l'état global, composants d'icônes, styles adaptatifs) et amélioration de la configuration de l'application." />
     <MESSAGE value="Ajout de la fonctionnalité de copie d'URL nettoyée, intégration de la bibliothèque `scraper` pour l'analyse de contenu HTML, amélioration du flux de nettoyage des URLs (notamment LinkedIn), et ajustement des styles pour les composants existants." />
-    <option name="LAST_COMMIT_MESSAGE" value="Ajout de la fonctionnalité de copie d'URL nettoyée, intégration de la bibliothèque `scraper` pour l'analyse de contenu HTML, amélioration du flux de nettoyage des URLs (notamment LinkedIn), et ajustement des styles pour les composants existants." />
+    <MESSAGE value="Ajout du contexte de langue et des traductions (français et allemand), mise à jour des dépendances, amélioration de l'interface utilisateur avec localisation des textes et refactoring des icônes." />
+    <option name="LAST_COMMIT_MESSAGE" value="Ajout du contexte de langue et des traductions (français et allemand), mise à jour des dépendances, amélioration de l'interface utilisateur avec localisation des textes et refactoring des icônes." />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

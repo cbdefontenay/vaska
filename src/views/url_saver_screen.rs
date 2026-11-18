@@ -33,13 +33,10 @@ pub fn UrlSaverScreen() -> Element {
                         }
                         div { class: "text-center",
                             p { class: "text-base font-medium text-on-surface mb-1", {lang.t("no_saved_urls")} }
-                            p { class: "text-sm text-on-surface-variant",
-                                {lang.t("no_saved_urls_description")}
-                            }
+                            p { class: "text-sm text-on-surface-variant", {lang.t("no_saved_urls_description")} }
                         }
                     }
                 },
-
                 Some(saved_urls) => rsx! {
                     div { class: "flex flex-col gap-3",
                         for saved_url in saved_urls {

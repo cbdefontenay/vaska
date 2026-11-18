@@ -95,7 +95,9 @@ pub fn HomeScreen() -> Element {
                         } else {
                             parsed_url
                         };
-                        let (cleaned, tracker_origin, has_no_trackers) = clean_tracking_parameters(final_url);
+                        let (cleaned, tracker_origin, has_no_trackers) = clean_tracking_parameters(
+                            final_url,
+                        );
                         let tracker_origin = if is_linkedin {
                             Some("LinkedIn".to_string())
                         } else if is_tiktok {
@@ -103,7 +105,6 @@ pub fn HomeScreen() -> Element {
                         } else {
                             tracker_origin
                         };
-                        // Set warning message based on whether trackers were found
                         if has_no_trackers && !is_linkedin && !is_tiktok {
                             *WARNING_MESSAGE.write() = lang.t("no_trackers");
                         } else {

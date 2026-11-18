@@ -181,7 +181,7 @@ pub fn tracker_origin(parameter: &str, host: &str) -> Option<&'static str> {
         "li_fat_id" => Some("LinkedIn"),
         // Meta
         "fbclid" => Some("Facebook"),
-        "igshid" | "stkn" | "obrf" | "is" => Some("Instagram"),
+        "igshid" | "stkn" | "obrf" | "is" | "dlrf" => Some("Instagram"),
         // Google
         "gclid" | "gbraid" | "wbraid" | "dclid" => Some("Google"),
         // Microsoft
