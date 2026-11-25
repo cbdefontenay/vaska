@@ -20,6 +20,14 @@ cd "$PROJECT_DIR"
 dx bundle --android --release --package-types apk --target aarch64-linux-android 2>&1 || true
 # dx bundle échoue à cause de lint, mais les fichiers sont générés
 
+VERSION_CODE=2
+VERSION_NAME="0.1.2"
+GRADLE_FILE="$ANDROID_DIR/app/build.gradle.kts"
+sed -i -E \
+  -e "s/versionCode = [0-9]+/versionCode = ${VERSION_CODE}/" \
+  -e "s/versionName = \"[^\"]+\"/versionName = \"${VERSION_NAME}\"/" \
+  "$GRADLE_FILE"
+
 # 2. Remplacer les icônes mipmap
 echo "🎨 Remplacement des icônes..."
 convert "$LOGO" -resize 48x48 -background none -gravity center -extent 48x48 "$MIPMAP_DIR/mipmap-mdpi/ic_launcher.webp" 2>/dev/null
